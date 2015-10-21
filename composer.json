@@ -1,0 +1,15 @@
+{
+    "name": "met-mw/sorm",
+    "description": "Simple and lightweight ORM library.",
+    "type": "library",
+    "license": "LGPL-3.0",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "met-mw",
+            "email": "met-mw@rambler.ru"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
