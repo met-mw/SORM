@@ -5,12 +5,12 @@
  * Date: 21.10.15
  */
 
-namespace sorm\classes;
+namespace Met_MW\SORM\Additional;
 
 
-use sorm\interfaces\Interface_Driver;
+use Met_MW\SORM\Architecture\Interface_Driver;
 
-class Orm_Registry {
+class Registry {
 
     static private $container = [];
 

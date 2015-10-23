@@ -10,6 +10,8 @@
             "email": "met-mw@rambler.ru"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {}
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
 }

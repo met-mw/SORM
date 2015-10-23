@@ -5,13 +5,13 @@
  * Date: 04.10.15
  */
 
-namespace sorm;
+namespace Met_MW\SORM;
 
 
 use Exception;
-use sorm\classes\Orm_Registry;
-use sorm\interfaces\Interface_Driver;
-use sorm\traits\Trait_Setting;
+use Met_MW\SORM\Additional\Registry;
+use Met_MW\SORM\Architecture\Interface_Driver;
+use Met_MW\SORM\Extension\Trait_Setting;
 
 /**
  * Class Driver
@@ -28,7 +28,7 @@ abstract class Driver implements Interface_Driver {
             throw new Exception("Модель {$className} не существует");
         }
 
-        return new $className(Orm_Registry::get(self::cls()), $primaryKey);
+        return new $className(Registry::get(self::cls()), $primaryKey);
     }
 
     static public function cls() {

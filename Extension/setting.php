@@ -5,11 +5,10 @@
  * Date: 04.10.15
  */
 
-namespace sorm\traits;
+namespace Met_MW\SORM\Extension;
 
 /**
- * Class Trait_Setting
- * @package sorm\traits
+ * Trait Trait_Setting
  *
  * Примесь для классов.
  * Использование: В нужном классе прописать use Trait_Setting

@@ -5,7 +5,7 @@
  * Date: 04.10.15
  */
 
-namespace sorm\interfaces;
+namespace Met_MW\SORM\Architecture;
 
 
 interface Interface_Setting {

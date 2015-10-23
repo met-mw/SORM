@@ -5,12 +5,12 @@
  * Date: 04.10.15
  */
 
-namespace sorm;
+namespace Met_MW\SORM;
 
 
 use Exception;
-use sorm\interfaces\Interface_Driver;
-use sorm\interfaces\Interface_Entity;
+use Met_MW\SORM\Architecture\Interface_Driver;
+use Met_MW\SORM\Architecture\Interface_Entity;
 
 abstract class Entity implements Interface_Entity {
 
