@@ -10,7 +10,7 @@ namespace Met_MW\SORM\Additional;
 
 use Met_MW\SORM\Architecture\Interface_Driver;
 
-class Registry {
+class SORM_Registry {
 
     static private $container = [];
 

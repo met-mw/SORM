@@ -9,7 +9,7 @@ namespace Met_MW\SORM;
 
 
 use Exception;
-use Met_MW\SORM\Additional\Registry;
+use Met_MW\SORM\Additional\SORM_Registry;
 use Met_MW\SORM\Architecture\Interface_Driver;
 use Met_MW\SORM\Extension\Trait_Setting;
 
@@ -28,7 +28,7 @@ abstract class Driver implements Interface_Driver {
             throw new Exception("Модель {$className} не существует");
         }
 
-        return new $className(Registry::get(self::cls()), $primaryKey);
+        return new $className(SORM_Registry::get(self::cls()), $primaryKey);
     }
 
     static public function cls() {
