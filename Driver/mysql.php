@@ -5,17 +5,16 @@
  * Date: 03.10.15
  */
 
-namespace sorm\drivers;
+namespace Met_MW\SORM\Driver;
 
 
+use Met_MW\SORM\Driver;
 use mysqli;
 use mysqli_result;
 use mysqli_stmt;
-use sorm\Driver;
 
 /**
  * Class Mysql
- * @package kernel\orm\drivers
  *
  * Драйвер для работы с MySQL и MariaDB
  */
