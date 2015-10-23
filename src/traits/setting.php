@@ -5,7 +5,7 @@
  * Date: 04.10.15
  */
 
-namespace Met_MW\SORM\Extension;
+namespace Met_MW\SORM\traits;
 
 /**
  * Trait Trait_Setting

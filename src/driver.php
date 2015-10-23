@@ -9,9 +9,9 @@ namespace Met_MW\SORM;
 
 
 use Exception;
-use Met_MW\SORM\Additional\SORM_Registry;
-use Met_MW\SORM\Architecture\Interface_Driver;
-use Met_MW\SORM\Extension\Trait_Setting;
+use Met_MW\SORM\classes\SORM_Registry;
+use Met_MW\SORM\interfaces\Interface_Driver;
+use Met_MW\SORM\traits\Trait_Setting;
 
 /**
  * Class Driver

@@ -9,8 +9,8 @@ namespace Met_MW\SORM;
 
 
 use Exception;
-use Met_MW\SORM\Architecture\Interface_Driver;
-use Met_MW\SORM\Architecture\Interface_Entity;
+use Met_MW\SORM\interfaces\Interface_Driver;
+use Met_MW\SORM\interfaces\Interface_Entity;
 
 abstract class Entity implements Interface_Entity {
 

@@ -5,7 +5,7 @@
  * Date: 03.10.15
  */
 
-namespace Met_MW\SORM\Architecture;
+namespace Met_MW\SORM\interfaces;
 
 
 interface Interface_Driver {

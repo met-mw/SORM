@@ -1,5 +1,5 @@
 {
-    "name": "met-mw/sorm",
+    "name": "Met_MW/SORM",
     "description": "Simple and lightweight ORM library.",
     "type": "library",
     "license": "LGPL-3.0",
@@ -13,5 +13,10 @@
     "require": {},
     "require-dev": {
         "phpunit/phpunit": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Met_Mw\\SORM\\": "/src"
+        }
     }
 }
