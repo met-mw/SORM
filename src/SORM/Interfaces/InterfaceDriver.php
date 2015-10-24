@@ -10,6 +10,8 @@ namespace SORM\Interfaces;
 
 interface InterfaceDriver {
 
+    static public function setup(array $settings = []);
+
     static public function factory($className, $primaryKey = null);
 
     static public function cls();

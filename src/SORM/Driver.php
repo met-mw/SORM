@@ -22,6 +22,11 @@ abstract class Driver implements InterfaceDriver {
 
     use TraitSetting;
 
+    static public function setup(array $settings = []) {
+        $driver = new static($settings);
+        SORMRegistry::add($driver);
+    }
+
     static public function factory($className, $primaryKey = null) {
         if (!class_exists($className)) {
             throw new Exception("Модель {$className} не существует");
@@ -34,10 +39,9 @@ abstract class Driver implements InterfaceDriver {
         return get_called_class();
     }
 
-    public function __construct(array $settings = []) {
+    protected function __construct(array $settings = []) {
         $this->setSettings($settings);
         $this->config();
-        SORMRegistry::add($this);
     }
 
     abstract protected function config();
