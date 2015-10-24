@@ -5,7 +5,7 @@
  * Date: 04.10.15
  */
 
-namespace Kernel\Traits;
+namespace SORM\Traits;
 
 /**
  * Trait Trait_Setting

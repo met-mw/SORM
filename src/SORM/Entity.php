@@ -5,12 +5,12 @@
  * Date: 04.10.15
  */
 
-namespace Kernel;
+namespace SORM;
 
 
 use Exception;
-use Kernel\Interfaces\Interface_Driver;
-use Kernel\Interfaces\Interface_Entity;
+use SORM\Interfaces\Interface_Driver;
+use SORM\Interfaces\Interface_Entity;
 
 abstract class Entity implements Interface_Entity {
 

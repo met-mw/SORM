@@ -5,7 +5,7 @@
  * Date: 03.10.15
  */
 
-namespace Kernel\Interfaces;
+namespace SORM\Interfaces;
 
 
 interface Interface_Entity {

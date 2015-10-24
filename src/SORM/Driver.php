@@ -5,17 +5,16 @@
  * Date: 04.10.15
  */
 
-namespace Kernel;
+namespace SORM;
 
 
 use Exception;
-use Kernel\Classes\SORM_Registry;
-use Kernel\Interfaces\Interface_Driver;
-use Kernel\Traits\Trait_Setting;
+use SORM\Classes\SORM_Registry;
+use SORM\Interfaces\Interface_Driver;
+use SORM\Traits\Trait_Setting;
 
 /**
  * Class Driver
- * @package kernel\orm
  *
  * Базовый класс драйвера доступа к данным
  */

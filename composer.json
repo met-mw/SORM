@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Kernel\\": "src/Kernel"
+            "SORM\\": "src/SORM"
         }
     }
 }

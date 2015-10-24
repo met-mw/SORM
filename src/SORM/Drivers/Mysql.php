@@ -5,10 +5,10 @@
  * Date: 03.10.15
  */
 
-namespace Kernel\Drivers;
+namespace SORM\Drivers;
 
 
-use Kernel\Driver;
+use SORM\Driver;
 use mysqli;
 use mysqli_result;
 use mysqli_stmt;
