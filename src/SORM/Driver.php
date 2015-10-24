@@ -39,7 +39,7 @@ abstract class Driver implements InterfaceDriver {
         return get_called_class();
     }
 
-    protected function __construct(array $settings = []) {
+    public function __construct(array $settings = []) {
         $this->setSettings($settings);
         $this->config();
     }
