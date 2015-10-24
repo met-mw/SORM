@@ -9,25 +9,25 @@ namespace SORM;
 
 
 use Exception;
-use SORM\Classes\SORM_Registry;
-use SORM\Interfaces\Interface_Driver;
-use SORM\Traits\Trait_Setting;
+use SORM\Classes\SORMRegistry;
+use SORM\Interfaces\InterfaceDriver;
+use SORM\Traits\TraitSetting;
 
 /**
  * Class Driver
  *
  * Базовый класс драйвера доступа к данным
  */
-abstract class Driver implements Interface_Driver {
+abstract class Driver implements InterfaceDriver {
 
-    use Trait_Setting;
+    use TraitSetting;
 
     static public function factory($className, $primaryKey = null) {
         if (!class_exists($className)) {
             throw new Exception("Модель {$className} не существует");
         }
 
-        return new $className(SORM_Registry::get(self::cls()), $primaryKey);
+        return new $className(SORMRegistry::get(self::cls()), $primaryKey);
     }
 
     static public function cls() {

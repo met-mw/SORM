@@ -8,7 +8,7 @@
 namespace SORM\Interfaces;
 
 
-interface Interface_Driver {
+interface InterfaceDriver {
 
     static public function factory($className, $primaryKey = null);
 

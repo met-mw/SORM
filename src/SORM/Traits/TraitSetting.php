@@ -8,7 +8,7 @@
 namespace SORM\Traits;
 
 /**
- * Trait Trait_Setting
+ * Trait TraitSetting
  *
  * Примесь для классов.
  * Использование: В нужном классе прописать use Trait_Setting
@@ -16,7 +16,7 @@ namespace SORM\Traits;
  * в частности добавляет возможность хранить в классе неограниченное количество
  * данных (встроенный массив)
  */
-trait Trait_Setting {
+trait TraitSetting {
 
     private $settings = [];
 

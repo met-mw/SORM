@@ -8,7 +8,7 @@
 namespace SORM\Interfaces;
 
 
-interface Interface_Setting {
+interface InterfaceSetting {
 
     /**
      * @param $name

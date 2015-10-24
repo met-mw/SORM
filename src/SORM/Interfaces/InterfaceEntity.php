@@ -8,7 +8,7 @@
 namespace SORM\Interfaces;
 
 
-interface Interface_Entity {
+interface InterfaceEntity {
 
     static public function cls();
 

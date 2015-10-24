@@ -9,10 +9,10 @@ namespace SORM;
 
 
 use Exception;
-use SORM\Interfaces\Interface_Driver;
-use SORM\Interfaces\Interface_Entity;
+use SORM\Interfaces\InterfaceDriver;
+use SORM\Interfaces\InterfaceEntity;
 
-abstract class Entity implements Interface_Entity {
+abstract class Entity implements InterfaceEntity {
 
     const FIELD_TYPE_STRING = 's';
     const FIELD_TYPE_INTEGER = 'i';
@@ -35,10 +35,10 @@ abstract class Entity implements Interface_Entity {
     /** @var string */
     protected $primaryKeyName = 'id';
 
-    /** @var Interface_Driver  */
+    /** @var InterfaceDriver  */
     private $driver;
 
-    public function __construct(Interface_Driver $driver, $primaryKey = null) {
+    public function __construct(InterfaceDriver $driver, $primaryKey = null) {
         $this->driver = $driver;
 
         if (!is_null($primaryKey)) {

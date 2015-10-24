@@ -8,9 +8,9 @@
 namespace SORM\Classes;
 
 
-use SORM\Interfaces\Interface_Driver;
+use SORM\Interfaces\InterfaceDriver;
 
-class SORM_Registry {
+class SORMRegistry {
 
     static private $container = [];
 
@@ -19,7 +19,7 @@ class SORM_Registry {
      *
      * @param string $name Имя записи
      *
-     * @return Interface_Driver
+     * @return InterfaceDriver
      */
     static public function get($name) {
         return self::$container[$name];
@@ -28,9 +28,9 @@ class SORM_Registry {
     /**
      * Добавить данные в реестр
      *
-     * @param Interface_Driver $driver Драйвер
+     * @param InterfaceDriver $driver Драйвер
      */
-    static public function add(Interface_Driver $driver) {
+    static public function add(InterfaceDriver $driver) {
         if (!isset(self::$container[$driver::cls()])) {
             self::$container[$driver::cls()] = $driver;
         }
