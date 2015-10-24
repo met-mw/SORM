@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Met_Mw\\SORM\\": "/src"
+            "Kernel\\": "src/Kernel"
         }
     }
 }

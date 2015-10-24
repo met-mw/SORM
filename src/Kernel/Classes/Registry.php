@@ -5,10 +5,10 @@
  * Date: 21.10.15
  */
 
-namespace Met_MW\SORM\classes;
+namespace Kernel\Classes;
 
 
-use Met_MW\SORM\interfaces\Interface_Driver;
+use Kernel\Interfaces\Interface_Driver;
 
 class SORM_Registry {
 

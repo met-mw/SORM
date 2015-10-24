@@ -5,13 +5,13 @@
  * Date: 04.10.15
  */
 
-namespace Met_MW\SORM;
+namespace Kernel;
 
 
 use Exception;
-use Met_MW\SORM\classes\SORM_Registry;
-use Met_MW\SORM\interfaces\Interface_Driver;
-use Met_MW\SORM\traits\Trait_Setting;
+use Kernel\Classes\SORM_Registry;
+use Kernel\Interfaces\Interface_Driver;
+use Kernel\Traits\Trait_Setting;
 
 /**
  * Class Driver

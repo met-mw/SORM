@@ -5,7 +5,7 @@
  * Date: 04.10.15
  */
 
-namespace Met_MW\SORM\interfaces;
+namespace Kernel\Interfaces;
 
 
 interface Interface_Setting {
