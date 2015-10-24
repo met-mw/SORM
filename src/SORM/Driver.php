@@ -34,4 +34,12 @@ abstract class Driver implements InterfaceDriver {
         return get_called_class();
     }
 
+    public function __construct(array $settings = []) {
+        $this->setSettings($settings);
+        $this->config();
+        SORMRegistry::add($this);
+    }
+
+    abstract protected function config();
+
 }

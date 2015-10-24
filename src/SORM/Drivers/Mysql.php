@@ -27,9 +27,7 @@ class Mysql extends Driver {
     /** @var mysqli_stmt */
     private $stmt = null;
 
-    public function __construct(array $settings = []) {
-        $this->setSettings($settings);
-
+    protected function config() {
         $host = $this->getSetting('host');
         $user = $this->getSetting('user');
         $password = $this->getSetting('password');
