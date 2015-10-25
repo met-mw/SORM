@@ -1,5 +1,5 @@
 {
-    "name": "met_mw/sorm",
+    "name": "Met_MW/SORM",
     "description": "Simple and lightweight ORM library.",
     "type": "library",
     "license": "LGPL-3.0",
