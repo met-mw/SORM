@@ -12,9 +12,6 @@
     ],
     "minimum-stability": "dev",
     "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "*"
-    },
     "autoload": {
         "psr-4": {
             "SORM\\": "src/SORM"
