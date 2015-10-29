@@ -40,7 +40,7 @@ class DataSource {
     }
 
     static public function setCurrent($uniqueName) {
-        if (!isset(self::$drivers[self::$current])) {
+        if (!isset(self::$drivers[$uniqueName])) {
             throw new Exception("Драйвер с именем \"{$uniqueName}\" не установлен.");
         }
 
