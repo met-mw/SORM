@@ -1,17 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: metr
- * Date: 03.10.15
- */
-
 namespace SORM\Drivers;
 
 
-use SORM\Driver;
+use Exception;
 use mysqli;
 use mysqli_result;
 use mysqli_stmt;
+use SORM\Driver;
 
 /**
  * Class Mysql
@@ -36,7 +31,7 @@ class Mysql extends Driver {
         $this->mysqli = new mysqli($host, $user, $password, $db);
 
         if ($this->mysqli->connect_errno) {
-            echo "Не удалось подключиться к MySQL: " . $this->mysqli->connect_error;
+            throw new Exception("Не удалось подключиться к MySQL: " . $this->mysqli->connect_error);
         }
     }
 

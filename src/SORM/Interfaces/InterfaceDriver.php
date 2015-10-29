@@ -1,20 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: metr
- * Date: 03.10.15
- */
-
 namespace SORM\Interfaces;
 
 
 interface InterfaceDriver {
-
-    static public function setup(array $settings = []);
-
-    static public function factory($className, $primaryKey = null);
-
-    static public function cls();
 
     public function query($query);
 
