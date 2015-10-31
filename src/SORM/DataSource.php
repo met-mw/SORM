@@ -14,8 +14,6 @@ use SORM\Traits\TraitSetting;
  */
 class DataSource {
 
-    use TraitSetting;
-
     const DRIVER_MYSQL = 'MySQL';
     const DRIVER_POSTGRESQL = 'PostgreSQL';
 
