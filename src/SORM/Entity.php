@@ -74,7 +74,7 @@ abstract class Entity implements InterfaceEntity {
     public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null) {
         $driver = $this->driver;
 
-        $orderBy = (is_null($order) ? $this->primaryKeyName : $order) . " {$direction}";
+        $orderBy = 'order by ' .  (is_null($order) ? $this->primaryKeyName : $order) . " {$direction}";
         $query = "select * from {$this->tableName} {$orderBy}";
         if (!is_null($limit)) {
             $query .= "limit {$limit}";
