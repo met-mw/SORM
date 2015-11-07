@@ -11,6 +11,8 @@ interface InterfaceEntity {
      */
     public function load($primaryKey);
 
+    public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null);
+
     public function getPrimaryKey();
 
     public function commit();

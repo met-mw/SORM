@@ -63,6 +63,39 @@ abstract class Entity implements InterfaceEntity {
         }
     }
 
+    /**
+     * @param string|null $order
+     * @param string $direction
+     * @param int|null $limit
+     * @param int|null $offset
+     *
+     * @return static[]
+     */
+    public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null) {
+        $driver = $this->driver;
+
+        $orderBy = (is_null($order) ? $this->getPrimaryKey() : $order) . " {$direction}";
+        $query = "select * from {$this->tableName} {$orderBy}";
+        if (!is_null($limit)) {
+            $query .= "limit {$limit}";
+        }
+        if (!is_null($offset)) {
+            $query .= "offset {$offset}";
+        }
+
+        $driver->query($query);
+        $entities = [];
+        foreach ($driver->fetchAssoc() as $row) {
+            foreach ($row as $field => $value) {
+                $entity = new static($driver);
+                $entity->{$field} = $value;
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
+    }
+
     public function getPrimaryKey() {
         return isset($this->fieldValues[$this->primaryKeyName])
             ? $this->fieldValues[$this->primaryKeyName]
