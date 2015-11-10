@@ -39,14 +39,14 @@ class Insert extends Builder {
         $fields = implode(', ', $this->fields);
         $valuesSet = '';
         foreach ($this->valuesSet as $values) {
-            $valuesSet .= ' (';
+            $valuesSet .= ', (';
             foreach ($values as $value) {
                 $valuesSet .= is_numeric($value) ? $value : "'{$value}'";
             }
             $valuesSet .= ')';
         }
-        $valuesSet = trim($valuesSet);
-        $query = "insert into {$this->table} ({$fields}) {$valuesSet}";
+        $valuesSet = trim($valuesSet, ', ');
+        $query = "insert into {$this->table} ({$fields}) values {$valuesSet}";
 
         return $query;
     }
