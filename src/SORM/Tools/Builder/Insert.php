@@ -10,6 +10,10 @@ class Insert extends Builder {
     protected $fields = [];
     protected $valuesSet = [];
 
+    public function table($table) {
+        $this->table = $table;
+    }
+
     public function fields(array $fields) {
         $this->fields = $fields;
         return $this;
