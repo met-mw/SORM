@@ -12,9 +12,6 @@ use Exception;
 
 abstract class SUD extends Builder {
 
-    const WHERE_OPERAND_TYPE_F = 'field';
-    const WHERE_OPERAND_TYPE_V = 'value';
-
     protected $where = [];
 
     public function where(array $operand1, $operator, array $operand2) {
@@ -57,9 +54,9 @@ abstract class SUD extends Builder {
 
     private function buildOperand(array $operand) {
         list($operandType, $content) = $operand;
-        if ($operandType == self::WHERE_OPERAND_TYPE_F) {
+        if ($operandType == self::OPERAND_TYPE_F) {
             $result = $content;
-        } elseif ($operandType == self::WHERE_OPERAND_TYPE_V) {
+        } elseif ($operandType == self::OPERAND_TYPE_V) {
             $result = is_numeric($content) ? $content : "'{$content}'";
         } else {
             throw new Exception("Неизвестный тип операнда \"{$operandType}\".");
