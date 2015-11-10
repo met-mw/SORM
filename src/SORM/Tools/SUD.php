@@ -17,7 +17,7 @@ abstract class SUD extends Builder {
 
     protected $where = [];
 
-    public function where($operand1, $operator, $operand2) {
+    public function where(array $operand1, $operator, array $operand2) {
         $this->where[] = [$operand1, $operator, $operand2];
         return $this;
     }
