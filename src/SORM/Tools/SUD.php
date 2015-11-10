@@ -8,7 +8,12 @@
 namespace SORM\Tools;
 
 
+use Exception;
+
 abstract class SUD extends Builder {
+
+    const WHERE_OPERAND_TYPE_F = 'field';
+    const WHERE_OPERAND_TYPE_V = 'value';
 
     protected $where = [];
 
@@ -38,18 +43,29 @@ abstract class SUD extends Builder {
     }
 
     protected function buildWhere() {
-        $where = '';
+        $where = empty($this->where) ? '' : 'where';
         foreach ($this->where as $proposal) {
             if (is_array($proposal)) {
-                $operand1 = is_numeric($proposal[0]) ? $proposal[0] : "'{$proposal[0]}'";
-                $operand2 = is_numeric($proposal[2]) ? $proposal[2] : "'{$proposal[2]}'";
-                $where .= " {$operand1}{$proposal[1]}{$operand2}";
+                $where .= " {$this->buildOperand($proposal[0])}{$proposal[1]}{$this->buildOperand($proposal[2])}";
             } else {
                 $where .= " {$proposal}";
             }
         }
 
-        return trim($where);
+        return $where;
+    }
+
+    private function buildOperand(array $operand) {
+        list($operandType, $content) = $operand;
+        if ($operandType == self::WHERE_OPERAND_TYPE_F) {
+            $result = $content;
+        } elseif ($operandType == self::WHERE_OPERAND_TYPE_V) {
+            $result = is_numeric($content) ? $content : "'{$content}'";
+        } else {
+            throw new Exception("Неизвестный тип операнда \"{$operandType}\".");
+        }
+
+        return $result;
     }
 
 }
