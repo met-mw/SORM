@@ -12,6 +12,7 @@ class Insert extends Builder {
 
     public function table($table) {
         $this->table = $table;
+        return $this;
     }
 
     public function fields(array $fields) {
