@@ -10,32 +10,31 @@ namespace SORM\Tools;
 
 abstract class SUD extends Builder {
 
-    protected $where = [
-        '(',
-        ['a', '=', 'b'],
-        'and',
-        ['c', '=', 'd'],
-        ')'
-    ];
+    protected $where = [];
 
     public function where($operand1, $operator, $operand2) {
         $this->where[] = [$operand1, $operator, $operand2];
+        return $this;
     }
 
     public function whereAnd() {
         $this->where[] = 'and';
+        return $this;
     }
 
     public function whereOr() {
         $this->where[] = 'or';
+        return $this;
     }
 
     public function whereBracketOpen() {
         $this->where[] = '(';
+        return $this;
     }
 
     public function whereBracketClose() {
         $this->where[] = ')';
+        return $this;
     }
 
     protected function buildWhere() {

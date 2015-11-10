@@ -11,18 +11,22 @@ class Delete extends SUD {
 
     public function tables(array $tables) {
         $this->tables = $tables;
+        return $this;
     }
 
     public function usingTables(array $usingTables) {
         $this->usingTables = $usingTables;
+        return $this;
     }
 
     public function table($table) {
         $this->tables[] = $table;
+        return $this;
     }
 
     public function usingTable($usingTable) {
         $this->usingTables[] = $usingTable;
+        return $this;
     }
 
 
