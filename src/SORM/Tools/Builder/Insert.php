@@ -42,7 +42,7 @@ class Insert extends Builder {
             $valuesSet .= ', (';
             $valuesArray = [];
             foreach ($values as $value) {
-                $valuesArray[] = is_numeric($value) ? $value : "'{$value}'";
+                $valuesArray[] = is_numeric($value) || is_null($value) ? $value : "'{$value}'";
             }
             $valuesSet .= implode(', ', $valuesArray);
             $valuesSet .= ')';
