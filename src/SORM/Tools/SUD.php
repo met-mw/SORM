@@ -38,7 +38,7 @@ abstract class SUD extends Builder {
         $where = empty($this->where) ? '' : 'where';
         foreach ($this->where as $proposal) {
             if (is_array($proposal)) {
-                $where .= " {$this->buildOperand($proposal[0])}{$proposal[1]}{$this->buildOperand($proposal[2])}";
+                $where .= " {$this->buildOperand($proposal[0])} {$proposal[1]} {$this->buildOperand($proposal[2])}";
             } else {
                 $where .= " {$proposal}";
             }
