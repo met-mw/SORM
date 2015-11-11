@@ -62,6 +62,11 @@ abstract class Entity implements InterfaceEntity {
         return $this->builder;
     }
 
+    public function findAll() {
+        $query = $this->builder()->build();
+        return $this->resultToEntities($query);
+    }
+
     public function load($primaryKey) {
         $driver = $this->driver;
 
@@ -88,7 +93,6 @@ abstract class Entity implements InterfaceEntity {
      * @return static[]
      */
     public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null) {
-        $driver = $this->driver;
         $select = new Select();
 
         $query = $select
@@ -98,17 +102,7 @@ abstract class Entity implements InterfaceEntity {
             ->offset($offset)
             ->build();
 
-        $driver->query($query);
-        $entities = [];
-        while ($result = $driver->fetchAssoc()) {
-            $entity = new static($driver);
-            foreach ($result as $field => $value) {
-                $entity->{$field} = $value;
-            }
-            $entities[] = $entity;
-        }
-
-        return $entities;
+        return $this->resultToEntities($query);
     }
 
     public function getPrimaryKey() {
@@ -203,6 +197,20 @@ abstract class Entity implements InterfaceEntity {
 
     final static public function cls() {
         return get_called_class();
+    }
+
+    protected function resultToEntities($query) {
+        $this->driver->query($query);
+        $entities = [];
+        while ($result = $this->driver->fetchAssoc()) {
+            $entity = new static($this->driver);
+            foreach ($result as $field => $value) {
+                $entity->{$field} = $value;
+            }
+            $entities[] = $entity;
+        }
+
+        return $entities;
     }
 
 }
