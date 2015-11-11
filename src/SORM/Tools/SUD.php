@@ -3,6 +3,7 @@ namespace SORM\Tools;
 
 
 use Exception;
+use SORM\Tools\Builder\Select;
 
 abstract class SUD extends Builder {
 
@@ -52,12 +53,19 @@ abstract class SUD extends Builder {
 
     private function buildOperand(array $operand) {
         list($operandType, $content) = $operand;
-        if ($operandType == self::OPERAND_TYPE_F) {
-            $result = $content;
-        } elseif ($operandType == self::OPERAND_TYPE_V) {
-            $result = is_numeric($content) ? $content : "'{$content}'";
-        } else {
-            throw new Exception("Неизвестный тип операнда \"{$operandType}\".");
+        switch ($operandType) {
+            case self::OPERAND_TYPE_F:
+                $result = $content;
+                break;
+            case self::OPERAND_TYPE_V:
+                $result = is_numeric($content) ? $content : "'{$content}'";
+                break;
+            case self::OPERAND_TYPE_O:
+                /** @var Select $content */
+                $result = "({$content->build()})";
+                break;
+            default:
+                throw new Exception("Неизвестный тип операнда \"{$operandType}\".");
         }
 
         return $result;
