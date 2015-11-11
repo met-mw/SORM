@@ -20,7 +20,7 @@ class Insert extends Builder {
         return $this;
     }
 
-    public function field(array $field) {
+    public function field($field) {
         $this->fields[] = $field;
         return $this;
     }

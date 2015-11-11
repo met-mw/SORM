@@ -7,6 +7,7 @@ abstract class Builder {
     const OPERAND_TYPE_F = 0;
     const OPERAND_TYPE_V = 1;
     const OPERAND_TYPE_O = 2;
+    const OPERAND_TYPE_P = 3;
 
     abstract public function table($table);
 

@@ -55,6 +55,7 @@ abstract class SUD extends Builder {
         list($operandType, $content) = $operand;
         switch ($operandType) {
             case self::OPERAND_TYPE_F:
+            case self::OPERAND_TYPE_P:
                 $result = $content;
                 break;
             case self::OPERAND_TYPE_V:
@@ -69,6 +70,11 @@ abstract class SUD extends Builder {
         }
 
         return $result;
+    }
+
+    public function clearWhere() {
+        $this->where = [];
+        return $this;
     }
 
 }

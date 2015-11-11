@@ -5,6 +5,11 @@ namespace SORM;
 use Exception;
 use SORM\Interfaces\InterfaceDriver;
 use SORM\Interfaces\InterfaceEntity;
+use SORM\Tools\Builder\Delete;
+use SORM\Tools\Builder\Insert;
+use SORM\Tools\Builder\Select;
+use SORM\Tools\Builder;
+use SORM\Tools\Builder\Update;
 
 abstract class Entity implements InterfaceEntity {
 
@@ -32,8 +37,13 @@ abstract class Entity implements InterfaceEntity {
     /** @var InterfaceDriver  */
     private $driver;
 
+    /** @var Select */
+    private $builder;
+
     public function __construct(InterfaceDriver $driver, $primaryKey = null) {
         $this->driver = $driver;
+        $this->builder = new Select();
+        $this->builder->table($this->tableName);
 
         if (!is_null($primaryKey)) {
             $this->load($primaryKey);
@@ -51,7 +61,9 @@ abstract class Entity implements InterfaceEntity {
     public function load($primaryKey) {
         $driver = $this->driver;
 
-        $query = "select * from {$this->tableName} where {$this->primaryKeyName}={$primaryKey}";
+        $query = $this->builder
+            ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_V, $primaryKey])
+            ->build();
         $driver->query($query);
 
         foreach ($driver->fetchAssoc() as $field => $value) {
@@ -73,15 +85,14 @@ abstract class Entity implements InterfaceEntity {
      */
     public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null) {
         $driver = $this->driver;
+        $select = new Select();
 
-        $orderBy = 'order by ' .  (is_null($order) ? $this->primaryKeyName : $order) . " {$direction}";
-        $query = "select * from {$this->tableName} {$orderBy}";
-        if (!is_null($limit)) {
-            $query .= "limit {$limit}";
-        }
-        if (!is_null($offset)) {
-            $query .= "offset {$offset}";
-        }
+        $query = $select
+            ->clearWhere()
+            ->order(is_null($order) ? $this->primaryKeyName : $order, $direction)
+            ->limit($limit)
+            ->offset($offset)
+            ->build();
 
         $driver->query($query);
         $entities = [];
@@ -110,24 +121,33 @@ abstract class Entity implements InterfaceEntity {
         $driver = $this->driver;
 
         if (is_null($this->getPrimaryKey())) {
-            $fields = implode(', ', $this->allowedFields);
-            $values = implode(', ', $this->fieldValues);
+            $insert = new Insert();
+            $insert
+                ->table($this->tableName)
+                ->fields(array_diff($this->allowedFields, [$this->primaryKeyName]));
 
-            $query = "insert into {$this->tableName} ({$fields}) values ({$values})";
+            $values = [];
+            foreach (array_diff($this->allowedFields, [$this->primaryKeyName]) as $field) {
+                $values[] = $this->{$field};
+            }
+            $query = $insert
+                ->values($values)
+                ->build();
+
             $driver->query($query);
             $this->fieldValues[$this->primaryKeyName] = $driver->lastInsertId();
         } else {
-            $fields = [];
-            foreach ($this->allowedFields as $field) {
-                if ($field == $this->primaryKeyName) {
-                    continue;
-                }
+            $update = new Update();
+            $update
+                ->table($this->tableName);
 
-                $fields[] = "{$field}=?";
+            foreach (array_diff($this->allowedFields, [$this->primaryKeyName]) as $field) {
+                $update->set($field, '?');
             }
-            $fieldsQuery = implode(', ', $fields);
+            $query = $update
+                ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_P, '?'])
+                ->build();
 
-            $query = "update {$this->tableName} set {$fieldsQuery} where {$this->primaryKeyName}=?";
             $driver->prepare($query);
 
             $types = '';
@@ -149,7 +169,13 @@ abstract class Entity implements InterfaceEntity {
     }
 
     public function delete() {
-        $query = "delete from {$this->tableName} where {$this->primaryKeyName}={$this->getPrimaryKey()}";
+        $delete = new Delete();
+
+        $query = $delete
+            ->table($this->tableName)
+            ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_V, $this->getPrimaryKey()])
+            ->build();
+
         $this->driver->query($query);
         foreach ($this->allowedFields as $field) {
             $this->fieldValues[$field] = null;
