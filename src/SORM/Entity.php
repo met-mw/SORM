@@ -62,6 +62,9 @@ abstract class Entity implements InterfaceEntity {
         return $this->builder;
     }
 
+    /**
+     * @return static[]
+     */
     public function findAll() {
         $query = $this->builder()->build();
         return $this->resultToEntities($query);
@@ -199,6 +202,11 @@ abstract class Entity implements InterfaceEntity {
         return get_called_class();
     }
 
+    /**
+     * @param $query
+     *
+     * @return static[]
+     */
     protected function resultToEntities($query) {
         $this->driver->query($query);
         $entities = [];
