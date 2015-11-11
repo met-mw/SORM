@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: metr
- * Date: 11.11.15
- */
-
 namespace SORM\Tools;
 
 
@@ -47,6 +41,10 @@ abstract class SUD extends Builder {
             } else {
                 $where .= " {$proposal}";
             }
+        }
+
+        if ($where != '') {
+            $where = " {$where}";
         }
 
         return $where;
