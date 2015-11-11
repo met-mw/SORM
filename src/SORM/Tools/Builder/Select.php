@@ -84,7 +84,7 @@ class Select extends SUD {
 
         $orders = implode(', ', $orderArray);
         if ($orders != '') {
-            $orders = " {$orders}";
+            $orders = " order by {$orders}";
         }
 
         return $orders;
