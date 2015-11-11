@@ -59,7 +59,13 @@ abstract class SUD extends Builder {
                 $result = $content;
                 break;
             case self::OPERAND_TYPE_V:
-                $result = is_numeric($content) ? $content : "'{$content}'";
+                if (is_numeric($content)) {
+                    $result = $content;
+                } elseif (is_null($content)) {
+                    $result = 'null';
+                } else {
+                    $result = "'{$content}'";
+                }
                 break;
             case self::OPERAND_TYPE_O:
                 /** @var Select $content */
