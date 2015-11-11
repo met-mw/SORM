@@ -56,8 +56,8 @@ class Select extends SUD {
 
     public function build() {
         $tables = implode(', ', $this->tables);
-        $limit = is_null($this->limit) ? '' : " {$this->limit}";
-        $offset = is_null($this->offset) ? '' : " {$this->offset}";
+        $limit = is_null($this->limit) ? '' : " limit {$this->limit}";
+        $offset = is_null($this->offset) ? '' : " offset {$this->offset}";
         $query = "select {$this->buildFields()} from {$tables}{$this->buildWhere()}{$this->buildOrder()}{$limit}{$offset}";
 
         return $query;
