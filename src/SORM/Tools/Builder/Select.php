@@ -73,7 +73,7 @@ class Select extends SUD {
             }
         }
 
-        return implode(', ', $fieldsArray);
+        return empty($fieldsArray) ? '*' : implode(', ', $fieldsArray);
     }
 
     private function buildOrder() {
