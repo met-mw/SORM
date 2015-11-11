@@ -28,7 +28,7 @@ class Update extends SUD {
         $setsArray = [];
         foreach ($this->sets as $set) {
             list($field, $value) = $set;
-            $setsArray[] = "{$field}=" . (is_numeric($value) ? $value : " '{$value}'");
+            $setsArray[] = "{$field}=" . (is_numeric($value) ? $value : "'{$value}'");
         }
         $sets = implode(', ', $setsArray);
 
