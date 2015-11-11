@@ -58,6 +58,10 @@ abstract class Entity implements InterfaceEntity {
         return $this->fieldValues[$name];
     }
 
+    public function builder() {
+        return $this->builder;
+    }
+
     public function load($primaryKey) {
         $driver = $this->driver;
 
