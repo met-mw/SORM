@@ -5,6 +5,7 @@ namespace SORM;
 use Exception;
 use SORM\Drivers\Mysql;
 use SORM\Interfaces\InterfaceDriver;
+use SORM\Interfaces\InterfaceEntity;
 use SORM\Traits\TraitSetting;
 
 /**
@@ -53,6 +54,13 @@ class DataSource {
         return self::$drivers[self::$current];
     }
 
+    /**
+     * @param string $className
+     * @param null $primaryKey
+     *
+     * @return InterfaceEntity
+     * @throws Exception
+     */
     static public function factory($className, $primaryKey = null) {
         if (!class_exists($className)) {
             throw new Exception("Модель \"{$className}\" не существует.");
