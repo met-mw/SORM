@@ -13,10 +13,10 @@ use SORM\Tools\Builder\Update;
 
 abstract class Entity implements InterfaceEntity {
 
-    const FIELD_TYPE_STRING = 's';
-    const FIELD_TYPE_INTEGER = 'i';
-    const FIELD_TYPE_DOUBLE = 'd';
-    const FIELD_TYPE_BLOB = 'b';
+    const FT_STRING = 's';
+    const FT_INTEGER = 'i';
+    const FT_DOUBLE = 'd';
+    const FT_BLOB = 'b';
 
     protected $isDeleted = false;
 
@@ -158,7 +158,7 @@ abstract class Entity implements InterfaceEntity {
                     continue;
                 }
 
-                $types .= isset($this->fieldTypes[$field]) ? $this->fieldTypes[$field] : self::FIELD_TYPE_STRING;
+                $types .= isset($this->fieldTypes[$field]) ? $this->fieldTypes[$field] : self::FT_STRING;
                 $attributes[] = $this->fieldValues[$field];
             }
             $types .= $this->fieldTypes[$this->primaryKeyName];
