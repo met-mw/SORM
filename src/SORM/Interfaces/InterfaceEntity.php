@@ -2,10 +2,15 @@
 namespace SORM\Interfaces;
 
 
+use SORM\Tools\Builder\Select;
+
 interface InterfaceEntity {
 
     static public function cls();
 
+    /**
+     * @return Select
+     */
     public function builder();
 
     /**
