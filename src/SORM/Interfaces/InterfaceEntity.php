@@ -6,6 +6,9 @@ use SORM\Tools\Builder\Select;
 
 interface InterfaceEntity {
 
+    /**
+     * @return string
+     */
     static public function cls();
 
     /**
@@ -18,8 +21,19 @@ interface InterfaceEntity {
      */
     public function load($primaryKey);
 
+    /**
+     * @return static[]
+     */
     public function findAll();
 
+    /**
+     * @param string $order
+     * @param string $direction
+     * @param int $limit
+     * @param int $offset
+     *
+     * @return static[]
+     */
     public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null);
 
     public function getPrimaryKey();
