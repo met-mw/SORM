@@ -8,6 +8,7 @@ use SORM\Tools\SUD;
 class Select extends SUD {
 
     protected $tables = [];
+    protected $sqlCalcFoundRows = null;
     protected $fields = [];
     protected $joins = [];
     protected $orders = [];
@@ -21,6 +22,11 @@ class Select extends SUD {
 
     public function table($table) {
         $this->tables[] = $table;
+        return $this;
+    }
+
+    public function sqlCalcFoundRows() {
+        $this->sqlCalcFoundRows = 'SQL_CALC_FOUND_ROWS';
         return $this;
     }
 
@@ -55,10 +61,11 @@ class Select extends SUD {
     }
 
     public function build() {
-        $tables = implode(', ', $this->tables);
+        $tables = empty($this->tables) ? '' : ' from ' . implode(', ', $this->tables);
         $limit = is_null($this->limit) ? '' : " limit {$this->limit}";
         $offset = is_null($this->offset) ? '' : " offset {$this->offset}";
-        $query = "select {$this->buildFields()} from {$tables}{$this->buildWhere()}{$this->buildOrder()}{$limit}{$offset}";
+        $calcFoundRows = is_null($this->sqlCalcFoundRows) ? '' : " {$this->sqlCalcFoundRows}";
+        $query = "select{$calcFoundRows} {$this->buildFields()}{$tables}{$this->buildWhere()}{$this->buildOrder()}{$limit}{$offset}";
 
         return $query;
     }
