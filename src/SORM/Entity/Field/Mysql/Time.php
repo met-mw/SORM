@@ -15,11 +15,11 @@ class Time extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
-        return "'{$value->format('H:i:s')}'";
+    public function toQueryWithQuotes($value) {
+        return "'{$value->format('%H:%i:%s')}'";
     }
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
         $intervalParts = explode(':', $value);
         $hours = ltrim($intervalParts[0], '0');
         $minutes = ltrim($intervalParts[1], '0');
@@ -33,6 +33,15 @@ class Time extends Type {
         }
 
         return $interval;
+    }
+
+    /**
+     * @param DateInterval $value
+     *
+     * @return string
+     */
+    public function toQuery(DateInterval $value) {
+        return $value->format('%H:%i:%s');
     }
 
 }

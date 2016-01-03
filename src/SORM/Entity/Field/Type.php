@@ -13,9 +13,13 @@ abstract class Type {
 
     protected $sqlParamType = null;
 
-    abstract public function prepareToSQL($value);
+    abstract public function toQueryWithQuotes($value);
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
+        return $value;
+    }
+
+    public function toQuery($value) {
         return $value;
     }
 

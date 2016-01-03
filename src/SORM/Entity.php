@@ -106,7 +106,7 @@ abstract class Entity implements InterfaceEntity {
         $driver->query($query);
 
         foreach ($driver->fetchAssoc() as $field => $value) {
-            $this->{$field} = $this->field($field)->sqlToObject($value);
+            $this->{$field} = $this->field($field)->type->toObject($value);
         }
     }
 
@@ -173,11 +173,15 @@ abstract class Entity implements InterfaceEntity {
             $types = '';
             $parameters = [];
             foreach ($allowedFields as $field) {
-                $types .= $this->field($field)->type->getSQLParamType();
-                $parameters[] = $this->{$field};
+                $currentField = $this->field($field);
+
+                $types .= $currentField->type->getSQLParamType();
+                $parameters[] = $currentField->asSql();
             }
-            $types .= $this->field($this->primaryKeyName)->type->getSQLParamType();
-            $parameters[] = $this->getPrimaryKey();
+            $primaryKeyField = $this->field($this->primaryKeyName);
+            $types .= $primaryKeyField->type->getSQLParamType();
+            $parameters[] = $primaryKeyField->asSql();
+
             $driver->bindParameter($types, $parameters);
             $driver->execute();
         }

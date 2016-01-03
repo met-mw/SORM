@@ -13,7 +13,7 @@ class Mediumtext extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
+    public function toQueryWithQuotes($value) {
         return "'{$value}'";
     }
 

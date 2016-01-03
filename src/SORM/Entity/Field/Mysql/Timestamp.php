@@ -16,11 +16,11 @@ class Timestamp extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
+    public function toQueryWithQuotes($value) {
         return "'{$value->format($this->format)}'";
     }
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
         $date = \DateTime::createFromFormat($this->format, $value);
 
         if (!$date) {
@@ -28,6 +28,15 @@ class Timestamp extends Type {
         }
 
         return  $date;
+    }
+
+    /**
+     * @param \DateTime $value
+     *
+     * @return string
+     */
+    public function toQuery(\DateTime $value) {
+        return $value->format($this->format);
     }
 
 }

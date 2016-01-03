@@ -13,12 +13,16 @@ class Mediumint extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
-        return "{$this->prepareToObject($value)}";
+    public function toQueryWithQuotes($value) {
+        return "{$this->toObject($value)}";
     }
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
         return (int)$value;
+    }
+
+    public function toQuery($value) {
+        return $this->toObject($value);
     }
 
 }

@@ -13,13 +13,17 @@ class Tinyint extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
+    public function toQueryWithQuotes($value) {
         $bool = (int)$value;
         return "{$bool}";
     }
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
         return (bool)$value;
+    }
+
+    public function toQuery($value) {
+        return (int)$value;
     }
 
 }

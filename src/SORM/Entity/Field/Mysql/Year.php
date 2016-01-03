@@ -14,14 +14,23 @@ class Year extends Type {
      *
      * @return string
      */
-    public function prepareToSQL($value) {
+    public function toQueryWithQuotes($value) {
         return "'{$value->y}'";
     }
 
-    public function prepareToObject($value) {
+    public function toObject($value) {
         $interval = new DateInterval('Y');
         $interval->y = (int)$value;
 
         return $interval;
+    }
+
+    /**
+     * @param DateInterval $value
+     *
+     * @return int
+     */
+    public function toQuery(DateInterval $value) {
+        return $value->y;
     }
 }

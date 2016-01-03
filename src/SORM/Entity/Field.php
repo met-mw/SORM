@@ -43,20 +43,12 @@ class Field {
         $this->extra = $extra;
     }
 
-    public function sqlToObject($value) {
-        return $this->type->prepareToObject($value);
+    public function asSql() {
+        return $this->type->toQuery($this->value);
     }
 
-    public function objectToSql($value) {
-        return $this->type->prepareToSQL($value);
-    }
-
-    public function valueAsObject() {
-        return $this->type->prepareToObject($this->value);
-    }
-
-    public function valueAsSql() {
-        return $this->type->prepareToSQL($this->value);
+    public function asSqlWithQuotes() {
+        return $this->type->toQueryWithQuotes($this->value);
     }
 
     public function isPrimary() {
