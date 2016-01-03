@@ -48,6 +48,8 @@ interface InterfaceEntity {
 
     public function getPrimaryKeyName();
 
+    public function prepareRelations();
+
     public function commit();
 
     public function delete();

@@ -51,7 +51,7 @@ abstract class Entity implements InterfaceEntity {
         return $this->field($name)->value;
     }
 
-    abstract protected function prepareRelations();
+    abstract public function prepareRelations();
 
     /**
      * Получить объект поля модели
@@ -236,6 +236,7 @@ abstract class Entity implements InterfaceEntity {
             foreach ($result as $field => $value) {
                 $entity->{$field} = $entity->field($field)->type->toObject($value);
             }
+            $entity->prepareRelations();
             $entities[] = $entity;
         }
 

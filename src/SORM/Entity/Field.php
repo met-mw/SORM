@@ -72,14 +72,17 @@ class Field {
 
     public function addRelationOTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
         $this->relations[$model->cls()] = new OTO($this, $model, $targetFieldName, $loaded);
+        return $this;
     }
 
     public function addRelationOTM(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
         $this->relations[$model->cls()] = new OTM($this, $model, $targetFieldName, $loaded);
+        return $this;
     }
 
     public function addRelationMTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
         $this->relations[$model->cls()] = new MTO($this, $model, $targetFieldName, $loaded);
+        return $this;
     }
 
     public function asSql() {
