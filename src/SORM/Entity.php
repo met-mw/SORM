@@ -56,17 +56,18 @@ abstract class Entity implements InterfaceEntity {
     /**
      * Получить объект поля модели
      *
-     * @param string $name Имя поля
+     * @param string|null $name Имя поля
      *
      * @return Field Объект поля
      * @throws Exception
      */
-    public function field($name) {
-        if (!isset($this->fields[$name])) {
-            throw new Exception("Поле \"{$name}\" не существует в модели \"{$this->tableName}\".");
+    public function field($name = null) {
+        $fieldName = is_null($name) ? $this->getPrimaryKeyName() : $name;
+        if (!isset($this->fields[$fieldName])) {
+            throw new Exception("Поле \"{$fieldName}\" не существует в модели \"{$this->tableName}\".");
         }
 
-        return $this->fields[$name];
+        return $this->fields[$fieldName];
     }
 
     public function getFields() {
@@ -179,7 +180,7 @@ abstract class Entity implements InterfaceEntity {
                 $types .= $currentField->type->getSQLParamType();
                 $parameters[] = $currentField->asSql();
             }
-            $primaryKeyField = $this->field($this->primaryKeyName);
+            $primaryKeyField = $this->field();
             $types .= $primaryKeyField->type->getSQLParamType();
             $parameters[] = $primaryKeyField->asSql();
 
