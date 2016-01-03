@@ -2,15 +2,14 @@
 namespace SORM\Tools;
 
 
-use Exception;
-use SORM\Tools\Builder\Select;
 
 abstract class SUD extends Builder {
 
     protected $where = [];
 
-    public function where(array $operand1, $operator, array $operand2) {
-        $this->where[] = [$operand1, $operator, $operand2];
+    public function where($expression) {
+        $this->where[] = $expression;
+
         return $this;
     }
 
@@ -36,12 +35,8 @@ abstract class SUD extends Builder {
 
     protected function buildWhere() {
         $where = empty($this->where) ? '' : 'where';
-        foreach ($this->where as $proposal) {
-            if (is_array($proposal)) {
-                $where .= " {$this->buildOperand($proposal[0])} {$proposal[1]} {$this->buildOperand($proposal[2])}";
-            } else {
-                $where .= " {$proposal}";
-            }
+        foreach ($this->where as $expression) {
+            $where .= " {$expression}";
         }
 
         if ($where != '') {
@@ -49,33 +44,6 @@ abstract class SUD extends Builder {
         }
 
         return $where;
-    }
-
-    private function buildOperand(array $operand) {
-        list($operandType, $content) = $operand;
-        switch ($operandType) {
-            case self::OPERAND_TYPE_F:
-            case self::OPERAND_TYPE_P:
-                $result = $content;
-                break;
-            case self::OPERAND_TYPE_V:
-                if (is_numeric($content)) {
-                    $result = $content;
-                } elseif (is_null($content)) {
-                    $result = 'null';
-                } else {
-                    $result = "'{$content}'";
-                }
-                break;
-            case self::OPERAND_TYPE_O:
-                /** @var Select $content */
-                $result = "({$content->build()})";
-                break;
-            default:
-                throw new Exception("Неизвестный тип операнда \"{$operandType}\".");
-        }
-
-        return $result;
     }
 
     public function clearWhere() {

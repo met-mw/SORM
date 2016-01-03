@@ -3,6 +3,8 @@ namespace SORM;
 
 
 use Exception;
+use SORM\Entity\Cache;
+use SORM\Entity\Field;
 use SORM\Interfaces\InterfaceDriver;
 use SORM\Interfaces\InterfaceEntity;
 use SORM\Tools\Builder\Delete;
@@ -13,16 +15,10 @@ use SORM\Tools\Builder\Update;
 
 abstract class Entity implements InterfaceEntity {
 
-    const FT_STRING = 's';
-    const FT_INTEGER = 'i';
-    const FT_DOUBLE = 'd';
-    const FT_BLOB = 'b';
-
     protected $isDeleted = false;
 
-    protected $allowedFields = [];
-    protected $fieldTypes = [];
-    protected $fieldValues = [];
+    /** @var Field[] */
+    protected $fields = [];
 
     protected $oneToOne = [];
     protected $oneToMany = [];
@@ -44,6 +40,7 @@ abstract class Entity implements InterfaceEntity {
         $this->driver = $driver;
         $this->builder = new Select();
         $this->builder->table($this->tableName);
+        $this->loadColumns();
 
         if (!is_null($primaryKey)) {
             $this->load($primaryKey);
@@ -51,11 +48,40 @@ abstract class Entity implements InterfaceEntity {
     }
 
     public function __set($name, $value) {
-        $this->fieldValues[$name] = $value;
+        $this->field($name)->value = $value;
     }
 
     public function __get($name) {
-        return $this->fieldValues[$name];
+        return $this->field($name)->value;
+    }
+
+    /**
+     * Получить объект поля модели
+     *
+     * @param string $name Имя поля
+     *
+     * @return Field Объект поля
+     * @throws Exception
+     */
+    public function field($name) {
+        if (!isset($this->fields[$name])) {
+            throw new Exception("Поле \"{$name}\" не существует в модели.");
+        }
+
+        return $this->fields[$name];
+    }
+
+    public function getFields() {
+        return $this->fields;
+    }
+
+    /**
+     * Получить список полей модели
+     *
+     * @return string[] Имена полей модели
+     */
+    public function getFieldsNames() {
+        return array_keys($this->fields);
     }
 
     public function builder() {
@@ -73,17 +99,14 @@ abstract class Entity implements InterfaceEntity {
     public function load($primaryKey) {
         $driver = $this->driver;
 
-        $query = $this->builder
-            ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_V, $primaryKey])
+        $query = $this->builder()
+            ->where("{$this->primaryKeyName}={$primaryKey}")
             ->build();
+
         $driver->query($query);
 
         foreach ($driver->fetchAssoc() as $field => $value) {
-            if (!in_array($field, $this->allowedFields)) {
-                continue;
-            }
-
-            $this->fieldValues[$field] = $value;
+            $this->{$field} = $this->field($field)->sqlToObject($value);
         }
     }
 
@@ -109,9 +132,7 @@ abstract class Entity implements InterfaceEntity {
     }
 
     public function getPrimaryKey() {
-        return isset($this->fieldValues[$this->primaryKeyName])
-            ? $this->fieldValues[$this->primaryKeyName]
-            : null;
+        return $this->{$this->primaryKeyName};
     }
 
     public function commit() {
@@ -120,15 +141,14 @@ abstract class Entity implements InterfaceEntity {
         }
 
         $driver = $this->driver;
+        $allowedFields = array_diff($this->getFieldsNames(), [$this->primaryKeyName]);
 
         if (is_null($this->getPrimaryKey())) {
             $insert = new Insert();
-            $insert
-                ->table($this->tableName)
-                ->fields(array_diff($this->allowedFields, [$this->primaryKeyName]));
+            $insert->table($this->tableName)->fields($allowedFields);
 
             $values = [];
-            foreach (array_diff($this->allowedFields, [$this->primaryKeyName]) as $field) {
+            foreach ($allowedFields as $field) {
                 $values[] = $this->{$field};
             }
             $query = $insert
@@ -136,34 +156,29 @@ abstract class Entity implements InterfaceEntity {
                 ->build();
 
             $driver->query($query);
-            $this->fieldValues[$this->primaryKeyName] = $driver->lastInsertId();
+            $this->{$this->primaryKeyName} = $driver->lastInsertId();
         } else {
             $update = new Update();
-            $update
-                ->table($this->tableName);
+            $update->table($this->tableName);
 
-            foreach (array_diff($this->allowedFields, [$this->primaryKeyName]) as $field) {
+            foreach ($allowedFields as $field) {
                 $update->set($field, '?');
             }
             $query = $update
-                ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_P, '?'])
+                ->where("{$this->primaryKeyName}=?")
                 ->build();
 
             $driver->prepare($query);
 
             $types = '';
-            $attributes = [];
-            foreach ($this->allowedFields as $field) {
-                if ($field == $this->primaryKeyName) {
-                    continue;
-                }
-
-                $types .= isset($this->fieldTypes[$field]) ? $this->fieldTypes[$field] : self::FT_STRING;
-                $attributes[] = $this->fieldValues[$field];
+            $parameters = [];
+            foreach ($allowedFields as $field) {
+                $types .= $this->field($field)->type->getSQLParamType();
+                $parameters[] = $this->{$field};
             }
-            $types .= $this->fieldTypes[$this->primaryKeyName];
-            $attributes[] = $this->getPrimaryKey();
-            $driver->bindParameter($types, $attributes);
+            $types .= $this->field($this->primaryKeyName)->type->getSQLParamType();
+            $parameters[] = $this->getPrimaryKey();
+            $driver->bindParameter($types, $parameters);
             $driver->execute();
         }
 
@@ -174,20 +189,20 @@ abstract class Entity implements InterfaceEntity {
 
         $query = $delete
             ->table($this->tableName)
-            ->where([Builder::OPERAND_TYPE_F, $this->primaryKeyName], '=', [Builder::OPERAND_TYPE_V, $this->getPrimaryKey()])
+            ->where("{$this->primaryKeyName}={$this->getPrimaryKey()}")
             ->build();
 
         $this->driver->query($query);
-        foreach ($this->allowedFields as $field) {
-            $this->fieldValues[$field] = null;
+        foreach ($this->getFieldsNames() as $field) {
+            $this->{$field} = null;
         }
         $this->isDeleted = true;
     }
 
     public function asJSON() {
         $jsonParts = [];
-        foreach ($this->allowedFields as $field) {
-            $jsonParts[] = "\"{$field}\": \"{$this->fieldValues[$field]}\"";
+        foreach ($this->getFieldsNames() as $field) {
+            $jsonParts[] = "\"{$field}\": \"{$this->{$field}}\"";
         }
         $json = '{' . implode(', ', $jsonParts) . '}';
 
@@ -219,6 +234,47 @@ abstract class Entity implements InterfaceEntity {
         }
 
         return $entities;
+    }
+
+    protected function loadColumns() {
+        $cachedColumnsInfo = Cache::instance()->get($this->tableName);
+        if (is_null($cachedColumnsInfo)) {
+            $this->driver->query("show columns from {$this->tableName}");
+            $columnsInfo = [];
+            while ($result = $this->driver->fetchRow()) {
+                list($fieldName, $type, $null, $key, $default, $extra) = $result;
+
+                $typeClass = $this->driver->getColumnTypeClass($type);
+                $columnsInfo[$fieldName] = [
+                    'fieldName' => $fieldName,
+                    'type' => new $typeClass(),
+                    'null' => $this->driver->detectFieldNull($null),
+                    'key' => $this->driver->detectFieldKey($key),
+                    'default' => $default,
+                    'extra' => $extra
+                ];
+            }
+
+            Cache::instance()->push($this->tableName, $columnsInfo);
+        } else {
+            $columnsInfo = Cache::instance()->get($this->tableName);
+        }
+
+        foreach ($columnsInfo as $columnInfo) {
+            $field = new Field(
+                $columnInfo['fieldName'],
+                $columnInfo['type'],
+                $columnInfo['null'],
+                $columnInfo['key'],
+                $columnInfo['default'],
+                null,
+                $columnInfo['extra']);
+            if ($field->isPrimary()) {
+                $this->primaryKeyName = $field->name;
+            }
+
+            $this->fields[$columnInfo['fieldName']] = $field;
+        }
     }
 
 }

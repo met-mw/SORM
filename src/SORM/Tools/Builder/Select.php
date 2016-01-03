@@ -2,10 +2,14 @@
 namespace SORM\Tools\Builder;
 
 
+use SORM\Entity;
 use SORM\Tools\Builder;
 use SORM\Tools\SUD;
 
 class Select extends SUD {
+
+    /** @var Entity */
+    protected $entity;
 
     protected $tables = [];
     protected $sqlCalcFoundRows = null;
@@ -14,6 +18,10 @@ class Select extends SUD {
     protected $orders = [];
     protected $limit = null;
     protected $offset = null;
+
+    public function entity(Entity $entity) {
+        $this->entity = $entity;
+    }
 
     public function tables(array $tables) {
         $this->tables[] = $tables;

@@ -18,11 +18,18 @@ interface InterfaceDriver {
 
     public function prepare($query);
 
-    public function bindParameter($types, array $attributes);
+    public function bindParameter($types, array $parameters);
 
     public function execute();
 
     public function getResult();
+
+    public function getColumnTypeClass($type);
+
+    public function detectFieldKey($key);
+
+    public function detectFieldNull($null);
+
 
 
 } 
