@@ -2,6 +2,7 @@
 namespace SORM\Interfaces;
 
 
+use SORM\Entity\Field;
 use SORM\Tools\Builder\Select;
 
 interface InterfaceEntity {
@@ -10,6 +11,13 @@ interface InterfaceEntity {
      * @return string
      */
     static public function cls();
+
+    /**
+     * @param $name
+     *
+     * @return Field
+     */
+    public function field($name);
 
     /**
      * @return Select
@@ -37,6 +45,8 @@ interface InterfaceEntity {
     public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null);
 
     public function getPrimaryKey();
+
+    public function getPrimaryKeyName();
 
     public function commit();
 

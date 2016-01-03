@@ -20,11 +20,6 @@ abstract class Entity implements InterfaceEntity {
     /** @var Field[] */
     protected $fields = [];
 
-    protected $oneToOne = [];
-    protected $oneToMany = [];
-    protected $manyToOne = [];
-    protected $manyToMany = [];
-
     /** @var string */
     protected $tableName;
     /** @var string */
@@ -43,6 +38,7 @@ abstract class Entity implements InterfaceEntity {
         $this->loadColumns();
 
         if (!is_null($primaryKey)) {
+            $this->prepareRelations();
             $this->load($primaryKey);
         }
     }
@@ -55,6 +51,8 @@ abstract class Entity implements InterfaceEntity {
         return $this->field($name)->value;
     }
 
+    abstract protected function prepareRelations();
+
     /**
      * Получить объект поля модели
      *
@@ -65,7 +63,7 @@ abstract class Entity implements InterfaceEntity {
      */
     public function field($name) {
         if (!isset($this->fields[$name])) {
-            throw new Exception("Поле \"{$name}\" не существует в модели.");
+            throw new Exception("Поле \"{$name}\" не существует в модели \"{$this->tableName}\".");
         }
 
         return $this->fields[$name];
@@ -122,7 +120,6 @@ abstract class Entity implements InterfaceEntity {
         $select = new Select();
 
         $query = $select
-            ->clearWhere()
             ->order(is_null($order) ? $this->primaryKeyName : $order, $direction)
             ->limit($limit)
             ->offset($offset)
@@ -133,6 +130,10 @@ abstract class Entity implements InterfaceEntity {
 
     public function getPrimaryKey() {
         return $this->{$this->primaryKeyName};
+    }
+
+    public function getPrimaryKeyName() {
+        return $this->primaryKeyName;
     }
 
     public function commit() {
@@ -230,9 +231,10 @@ abstract class Entity implements InterfaceEntity {
         $this->driver->query($query);
         $entities = [];
         while ($result = $this->driver->fetchAssoc()) {
+            /** @var InterfaceEntity $entity */
             $entity = new static($this->driver);
             foreach ($result as $field => $value) {
-                $entity->{$field} = $value;
+                $entity->{$field} = $entity->field($field)->type->toObject($value);
             }
             $entities[] = $entity;
         }
@@ -266,6 +268,7 @@ abstract class Entity implements InterfaceEntity {
 
         foreach ($columnsInfo as $columnInfo) {
             $field = new Field(
+                $this,
                 $columnInfo['fieldName'],
                 $columnInfo['type'],
                 $columnInfo['null'],
