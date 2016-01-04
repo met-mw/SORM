@@ -231,14 +231,17 @@ abstract class Entity implements InterfaceEntity {
     protected function resultToEntities($query) {
         $this->driver->query($query);
         $entities = [];
-        while ($result = $this->driver->fetchAssoc()) {
+        while ($result = $this->driver->fetchRow()) {
             /** @var InterfaceEntity $entity */
             $entity = new static($this->driver);
             foreach ($result as $field => $value) {
                 $entity->{$field} = $entity->field($field)->type->toObject($value);
             }
-            $entity->prepareRelations();
             $entities[] = $entity;
+        }
+
+        foreach ($entities as $entity) {
+            $entity->prepareRelations();
         }
 
         return $entities;
