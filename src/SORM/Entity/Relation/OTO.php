@@ -20,8 +20,7 @@ class OTO extends Relation {
         }
 
         $this->getModel()->builder()
-            ->where("{$this->targetFieldName}={$this->currentField->value}")
-            ->limit(1);
+            ->where("{$this->targetFieldName}={$this->currentField->value}");
         /** @var InterfaceEntity $entity */
         $entity = reset($this->getModel()->findAll());
 

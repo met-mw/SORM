@@ -19,8 +19,7 @@ class OTM extends Relation {
         }
 
         $this->getModel()->builder()
-            ->where("{$this->targetFieldName}={$this->currentField->value}")
-            ->order($this->getModel()->getPrimaryKeyName());
+            ->where("{$this->targetFieldName}={$this->currentField->value}");
         /** @var InterfaceEntity[] $entities */
         $entities = $this->getModel()->findAll();
 

@@ -62,12 +62,15 @@ class Field {
             throw new Exception("Связь на модель \"{$modelName}\" не существует.");
         }
 
-        $relation = $this->relations[$modelName];
-        return $relation->load();
+        return $this->relations[$modelName];
     }
 
-    public function getRelation($modelName) {
+    public function relation($modelName) {
         return $this->{$modelName};
+    }
+
+    public function loadRelation($modelName) {
+        return $this->{$modelName}->load();
     }
 
     public function addRelationOTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
