@@ -19,6 +19,8 @@ abstract class Entity implements InterfaceEntity {
 
     /** @var Field[] */
     protected $fields = [];
+    /** @var string[]  */
+    protected $fieldsDisplayNames = [];
 
     /** @var string */
     protected $tableName;
@@ -81,6 +83,10 @@ abstract class Entity implements InterfaceEntity {
      */
     public function getFieldsNames() {
         return array_keys($this->fields);
+    }
+
+    public function getFieldsDisplayNames() {
+        return $this->fieldsDisplayNames;
     }
 
     public function builder() {
