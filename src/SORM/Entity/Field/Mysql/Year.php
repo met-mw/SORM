@@ -30,7 +30,7 @@ class Year extends Type {
      *
      * @return int
      */
-    public function toQuery(DateInterval $value) {
+    public function toQuery($value) {
         return $value->y;
     }
 }

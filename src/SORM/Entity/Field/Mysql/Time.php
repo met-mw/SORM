@@ -40,7 +40,7 @@ class Time extends Type {
      *
      * @return string
      */
-    public function toQuery(DateInterval $value) {
+    public function toQuery($value) {
         return $value->format('%H:%i:%s');
     }
 

@@ -2,6 +2,7 @@
 namespace SORM\Entity\Field\Mysql;
 
 
+use DateTime;
 use Exception;
 use SORM\Entity\Field\Type;
 
@@ -12,7 +13,7 @@ class Timestamp extends Type {
     private $format = 'Y-m-d H:i:s';
 
     /**
-     * @param \DateTime $value
+     * @param DateTime $value
      *
      * @return string
      */
@@ -21,7 +22,7 @@ class Timestamp extends Type {
     }
 
     public function toObject($value) {
-        $date = \DateTime::createFromFormat($this->format, $value);
+        $date = DateTime::createFromFormat($this->format, $value);
 
         if (!$date) {
             throw new Exception("Неизвестный формат даты: {$value}");
@@ -31,11 +32,11 @@ class Timestamp extends Type {
     }
 
     /**
-     * @param \DateTime $value
+     * @param DateTime $value
      *
      * @return string
      */
-    public function toQuery(\DateTime $value) {
+    public function toQuery($value) {
         return $value->format($this->format);
     }
 

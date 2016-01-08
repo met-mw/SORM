@@ -35,7 +35,7 @@ class Datetime extends Type {
      *
      * @return mixed
      */
-    public function toQuery(\DateTime $value) {
+    public function toQuery($value) {
         return $value->format($this->format);
     }
 }
