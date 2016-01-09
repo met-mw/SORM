@@ -11,6 +11,13 @@ class MTO extends Relation {
     /** @var InterfaceEntity|null */
     protected $relation = null;
 
+    public function prepare() {
+        parent::prepare();
+
+        $this->getModel()->builder()
+            ->where("{$this->targetFieldName}={$this->currentField->value}");
+    }
+
     /**
      * @return InterfaceEntity
      */
@@ -19,8 +26,7 @@ class MTO extends Relation {
             return $this->relation;
         }
 
-        $this->getModel()->builder()
-            ->where("{$this->targetFieldName}={$this->currentField->value}");
+        $this->prepare();
         /** @var InterfaceEntity $entity */
         $aEntities = $this->getModel()->findAll();
         $entity = reset($aEntities);

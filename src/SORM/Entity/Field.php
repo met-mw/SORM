@@ -73,6 +73,13 @@ class Field {
         return $this->{$modelName}->load();
     }
 
+    public function prepareRelation($modelName) {
+        $relation = $this->relation($modelName);
+        $relation->prepare();
+
+        return $relation->getModel();
+    }
+
     public function addRelationOTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
         $this->relations[$model->cls()] = new OTO($this, $model, $targetFieldName, $loaded);
         return $this;

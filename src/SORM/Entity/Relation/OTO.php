@@ -11,6 +11,13 @@ class OTO extends Relation {
     /** @var InterfaceEntity|null */
     public $relation = null;
 
+    public function prepare() {
+        parent::prepare();
+
+        $this->getModel()->builder()
+            ->where("{$this->targetFieldName}={$this->currentField->value}");
+    }
+
     /**
      * @return InterfaceEntity
      */
@@ -19,8 +26,7 @@ class OTO extends Relation {
             return $this->relation;
         }
 
-        $this->getModel()->builder()
-            ->where("{$this->targetFieldName}={$this->currentField->value}");
+        $this->prepare();
         /** @var InterfaceEntity $entity */
         $entity = reset($this->getModel()->findAll());
 

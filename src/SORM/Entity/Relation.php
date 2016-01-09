@@ -30,6 +30,10 @@ abstract class Relation {
 
     abstract public function load();
 
+    public function prepare() {
+        $this->getModel()->builder()->clearWhere();
+    }
+
     /**
      * @return InterfaceEntity
      */

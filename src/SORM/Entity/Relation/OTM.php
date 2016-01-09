@@ -10,6 +10,13 @@ class OTM extends Relation {
     /** @var InterfaceEntity[] */
     protected $relations = [];
 
+    public function prepare() {
+        parent::prepare();
+
+        $this->getModel()->builder()
+            ->where("{$this->targetFieldName}={$this->currentField->value}");
+    }
+
     /**
      * @return InterfaceEntity[]
      */
@@ -18,8 +25,7 @@ class OTM extends Relation {
             return $this->relations;
         }
 
-        $this->getModel()->builder()
-            ->where("{$this->targetFieldName}={$this->currentField->value}");
+        $this->prepare();
         /** @var InterfaceEntity[] $entities */
         $entities = $this->getModel()->findAll();
 
