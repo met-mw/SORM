@@ -22,7 +22,8 @@ class MTO extends Relation {
         $this->getModel()->builder()
             ->where("{$this->targetFieldName}={$this->currentField->value}");
         /** @var InterfaceEntity $entity */
-        $entity = reset($this->getModel()->findAll());
+        $aEntities = $this->getModel()->findAll();
+        $entity = reset($aEntities);
 
         // Устанавливаем обратную связь
         $entity->field($this->targetFieldName)
