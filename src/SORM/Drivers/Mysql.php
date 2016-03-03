@@ -121,7 +121,12 @@ class Mysql extends Driver {
     }
 
     public function fetchAssoc() {
-        return $this->result->fetch_assoc();
+        $assoc = [];
+        while ($row = $this->result->fetch_assoc()) {
+            $assoc[] = $row;
+        }
+
+        return $assoc;
     }
 
     public function fetchRow() {
