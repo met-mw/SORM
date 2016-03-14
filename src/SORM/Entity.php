@@ -115,8 +115,10 @@ abstract class Entity implements InterfaceEntity {
         $driver->query($query);
 
         $fieldsData = $driver->fetchAssoc();
-        foreach ($fieldsData[0] as $field => $value) {
-            $this->{$field} = $this->field($field)->type->toObject($value);
+        if (!empty($fieldsData)) {
+            foreach ($fieldsData[0] as $field => $value) {
+                $this->{$field} = $this->field($field)->type->toObject($value);
+            }
         }
     }
 
