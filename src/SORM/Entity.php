@@ -72,6 +72,10 @@ abstract class Entity implements InterfaceEntity {
         return $this->fields[$fieldName];
     }
 
+    public function isNew() {
+        return !isset($this->fields[$this->getPrimaryKeyName()]) || !$this->fields[$this->getPrimaryKeyName()];
+    }
+
     public function getFields() {
         return $this->fields;
     }
