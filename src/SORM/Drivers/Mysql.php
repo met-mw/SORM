@@ -118,6 +118,9 @@ class Mysql extends Driver {
 
     public function query($query) {
         $this->result = $this->mysqli->query($query);
+        if ($this->mysqli->errno) {
+            throw new Exception("При выполнении запроса произошла ошибка: \"{$this->mysqli->error}\"");
+        }
     }
 
     public function fetchAssoc() {
