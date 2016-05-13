@@ -55,6 +55,11 @@ abstract class Entity implements InterfaceEntity {
         return $this->field($name)->value;
     }
 
+    /**
+     * @param $fieldName
+     * @param $modelName
+     * @return Entity[]
+     */
     public function findRelationCache($fieldName, $modelName)
     {
         return isset($this->relationsCache[$fieldName]) && isset($this->relationsCache[$fieldName][$modelName])
