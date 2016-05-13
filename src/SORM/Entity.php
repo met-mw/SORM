@@ -33,6 +33,8 @@ abstract class Entity implements InterfaceEntity {
     /** @var Select */
     private $builder;
 
+    private $relationsCache = [];
+
     public function __construct(InterfaceDriver $driver, $primaryKey = null) {
         $this->driver = $driver;
         $this->builder = new Select();
@@ -51,6 +53,18 @@ abstract class Entity implements InterfaceEntity {
 
     public function __get($name) {
         return $this->field($name)->value;
+    }
+
+    public function findRelationCache($fieldName, $modelName)
+    {
+        return isset($this->relationsCache[$fieldName]) && isset($this->relationsCache[$fieldName][$modelName])
+            ? $this->relationsCache[$fieldName][$modelName]
+            : [];
+    }
+
+    public function addRelationCache($fieldName, Entity $relatedEntity)
+    {
+        $this->relationsCache[$fieldName][$relatedEntity->cls()] = $relatedEntity;
     }
 
     abstract public function prepareRelations();
