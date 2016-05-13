@@ -69,7 +69,7 @@ abstract class Entity implements InterfaceEntity {
 
     public function addRelationCache($fieldName, Entity $relatedEntity)
     {
-        $this->relationsCache[$fieldName][$relatedEntity->cls()] = $relatedEntity;
+        $this->relationsCache[$fieldName][$relatedEntity->cls()][] = $relatedEntity;
     }
 
     abstract public function prepareRelations();
