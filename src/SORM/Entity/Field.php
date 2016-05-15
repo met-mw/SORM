@@ -5,9 +5,6 @@ namespace SORM\Entity;
 use Exception;
 use SORM\Entity\Field\Type;
 use SORM\Entity;
-use SORM\Entity\Relation\MTO;
-use SORM\Entity\Relation\OTM;
-use SORM\Entity\Relation\OTO;
 use SORM\Interfaces\InterfaceEntity;
 
 class Field {
@@ -33,8 +30,6 @@ class Field {
     /** @var InterfaceEntity */
     protected $entity;
 
-    /** @var Relation[] */
-    protected $relations = [];
 
     /**
      * @param \SORM\Interfaces\InterfaceEntity $entity
@@ -63,36 +58,6 @@ class Field {
         }
 
         return $this->relations[$modelName];
-    }
-
-    public function relation($modelName) {
-        return $this->{$modelName};
-    }
-
-    public function loadRelation($modelName) {
-        return $this->{$modelName}->load();
-    }
-
-    public function prepareRelation($modelName) {
-        $relation = $this->relation($modelName);
-        $relation->prepare();
-
-        return $relation->getModel();
-    }
-
-    public function addRelationOTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
-        $this->relations[$model->cls()] = new OTO($this, $model, $targetFieldName, $loaded);
-        return $this;
-    }
-
-    public function addRelationOTM(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
-        $this->relations[$model->cls()] = new OTM($this, $model, $targetFieldName, $loaded);
-        return $this;
-    }
-
-    public function addRelationMTO(InterfaceEntity $model, $targetFieldName = null, $loaded = false) {
-        $this->relations[$model->cls()] = new MTO($this, $model, $targetFieldName, $loaded);
-        return $this;
     }
 
     public function asSql() {

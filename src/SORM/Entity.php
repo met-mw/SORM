@@ -72,8 +72,6 @@ abstract class Entity implements InterfaceEntity {
         $this->relationsCache[$fieldName][$relatedEntity->cls()][] = $relatedEntity;
     }
 
-    abstract public function prepareRelations();
-
     /**
      * Получить объект поля модели
      *
@@ -271,10 +269,6 @@ abstract class Entity implements InterfaceEntity {
                 $entity->{$field} = $entity->field($field)->type->toObject($value);
             }
             $entities[] = $entity;
-        }
-
-        foreach ($entities as $entity) {
-            $entity->prepareRelations();
         }
 
         return $entities;
