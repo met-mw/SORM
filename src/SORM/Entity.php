@@ -42,7 +42,6 @@ abstract class Entity implements InterfaceEntity {
         $this->loadColumns();
 
         if (!is_null($primaryKey)) {
-            $this->prepareRelations();
             $this->load($primaryKey);
         }
     }
