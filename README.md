@@ -128,6 +128,8 @@ class Item extends Entity
         $oItem->addRelationCache('category_id', $this); // Кэшируем "Элемент категории" в полученной "Категории" по внешнему ключу
       }
     }
+    
+    return isset($aCategories[0]) ? $aCategories[0] : null;
   }
   
 }
