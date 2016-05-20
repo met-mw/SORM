@@ -23,7 +23,7 @@ return [
     'host' => '127.0.0.1',
     'user' => 'db_user_name',
     'password' => 'password',
-    'db' => 'dc_name'
+    'db' => 'db_name'
 ];
 ```
 
