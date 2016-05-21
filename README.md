@@ -135,7 +135,7 @@ class Item extends Entity
 }
 ```
 
-## Пример работы
+### Пример работы
 
 В описании связей используется класс DataSource и его метод factory(). Вся работа по созданию объектов модели ведётся через этот метод.
 Например, чтобы создать создать новый объект модели "Категория" нужно написать такой код:
@@ -161,6 +161,39 @@ $oCategory->commit(); // Сохраняем объект, если были из
 
 ```
 /** @var Category $oCategory */
-$oCategory = DataSource::factory(Catgory::cls(), 1); // Загружаем категорию с первичным ключем равным 1
+$oCategory = DataSource::factory(Category::cls(), 1); // Загружаем категорию с первичным ключем равным 1
 $aItems = $oCategory->getItems(); // Получаем по связям все элементы категории, которые принадлежат данной категории
+```
+
+### Выполнение произвольных запросов
+
+> Внимание! Извлечение данных очищает результаты выполнения запроса, поэтому извлечь данные можно только 1 раз после выполнения запроса.
+> Если необходимо извлечь данные ещё раз, то нужно повторить запрос к БД.
+
+#### Извлечь данные в виде массива
+```
+$currentDriver = DataSource::getCurrent(); // Получаем драйвер
+$currentDriver->query('select * from table_name'); // Выполняем запрос
+$result = $currentDriver->fetchAll(); // Извлекаем результаты в виде массива
+```
+
+#### Извлечь данные в виде ассоциативного массива
+```
+$currentDriver = DataSource::getCurrent(); // Получаем драйвер
+$currentDriver->query('select * from table_name'); // Выполняем запрос
+$result = $currentDriver->fetchAssoc(); // Извлекаем результаты в виде ассоциативного массива
+```
+
+#### Построковое извлечение данных
+```
+$currentDriver = DataSource::getCurrent(); // Получаем драйвер
+$currentDriver->query('select * from table_name'); // Выполняем запрос
+$result = $currentDriver->fetchRow(); // Извлекаем первую строку результатов
+```
+
+#### Получение списка полей, полученных в результате выполнения запроса
+```
+$currentDriver = DataSource::getCurrent(); // Получаем драйвер
+$currentDriver->query('select * from table_name'); // Выполняем запрос
+$result = $currentDriver->fetchFields(); // Получаем список полей результата
 ```
