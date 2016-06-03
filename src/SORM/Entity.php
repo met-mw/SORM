@@ -2,6 +2,7 @@
 namespace SORM;
 
 
+use DateTime;
 use Exception;
 use SORM\Entity\Cache;
 use SORM\Entity\Field;
@@ -237,7 +238,12 @@ abstract class Entity implements InterfaceEntity {
     public function asJSON() {
         $jsonParts = [];
         foreach ($this->getFieldsNames() as $field) {
-            $jsonParts[] = "\"{$field}\": \"{$this->{$field}}\"";
+            if ($field instanceof DateTime) {
+                $jsonParts[] = "\"{$field}\": \"{$this->{$field}->format('Y-m-d H:i:s')}\"";
+            } else {
+                $jsonParts[] = "\"{$field}\": \"{$this->{$field}}\"";
+            }
+
         }
         $json = '{' . implode(', ', $jsonParts) . '}';
 
