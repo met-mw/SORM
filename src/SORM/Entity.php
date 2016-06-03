@@ -238,7 +238,7 @@ abstract class Entity implements InterfaceEntity {
     public function asJSON() {
         $jsonParts = [];
         foreach ($this->getFieldsNames() as $field) {
-            if ($field instanceof DateTime) {
+            if ($this->{$field} instanceof DateTime) {
                 $jsonParts[] = "\"{$field}\": \"{$this->{$field}->format('Y-m-d H:i:s')}\"";
             } else {
                 $jsonParts[] = "\"{$field}\": \"{$this->{$field}}\"";
