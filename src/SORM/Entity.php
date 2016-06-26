@@ -2,23 +2,21 @@
 namespace SORM;
 
 
-use DateTime;
 use Exception;
-use SORM\Entity\Cache;
-use SORM\Entity\Field;
-use SORM\Interfaces\InterfaceDriver;
-use SORM\Interfaces\InterfaceEntity;
-use SORM\Tools\Builder\Delete;
-use SORM\Tools\Builder\Insert;
-use SORM\Tools\Builder\Select;
-use SORM\Tools\Builder;
-use SORM\Tools\Builder\Update;
+use InvalidArgumentException;
+use SimpleXMLElement;
+use SQueryBuilder\Query\Select;
+use SQueryBuilder\QueryBuilder;
+use stdClass;
 
-abstract class Entity implements InterfaceEntity {
+abstract class Entity implements EntityInterface {
 
+    /** @var bool Удалена-ли сущность */
     protected $isDeleted = false;
+    /** @var string Имя поля-флага удаления сущности */
+    protected $marksDeletedFieldName = 'deleted';
 
-    /** @var Field[] */
+    /** @var array */
     protected $fields = [];
     /** @var string[]  */
     protected $fieldsDisplayNames = [];
@@ -26,157 +24,291 @@ abstract class Entity implements InterfaceEntity {
     /** @var string */
     protected $tableName;
     /** @var string */
-    protected $primaryKeyName = 'id';
+    protected $pkName = 'id';
 
-    /** @var InterfaceDriver  */
+    /** @var DriverInterface  */
     private $driver;
 
-    /** @var Select */
+    /** @var QueryBuilder */
     private $builder;
+    /** @var Select */
+    private $select;
 
-    private $relationsCache = [];
 
-    public function __construct(InterfaceDriver $driver, $primaryKey = null) {
+    public function __construct(DriverInterface $driver, $primaryKey = null) {
         $this->driver = $driver;
-        $this->builder = new Select();
-        $this->builder->table($this->tableName);
-        $this->loadColumns();
+        $this->builder = new QueryBuilder();
+        $this->fields = $this->getDriver()->detectColumns($this);
 
         if (!is_null($primaryKey)) {
             $this->load($primaryKey);
         }
     }
 
+    /**
+     * Get this object class name
+     *
+     * @return string
+     */
+    final static public function cls() {
+        return get_called_class();
+    }
+
     public function __set($name, $value) {
-        $this->field($name)->value = $value;
+        if (!$this->hasField($name)) {
+            throw new InvalidArgumentException("Field with name \"{$name}\" not found in \"{$this->cls()}\" model.");
+        }
+
+        $this->fields[$name] = $value;
     }
 
     public function __get($name) {
-        return $this->field($name)->value;
-    }
-
-    /**
-     * @param $fieldName
-     * @param $modelName
-     * @return Entity[]
-     */
-    public function findRelationCache($fieldName, $modelName)
-    {
-        return isset($this->relationsCache[$fieldName]) && isset($this->relationsCache[$fieldName][$modelName])
-            ? $this->relationsCache[$fieldName][$modelName]
-            : [];
-    }
-
-    public function addRelationCache($fieldName, Entity $relatedEntity)
-    {
-        $this->relationsCache[$fieldName][$relatedEntity->cls()][] = $relatedEntity;
-    }
-
-    /**
-     * Получить объект поля модели
-     *
-     * @param string|null $name Имя поля
-     *
-     * @return Field Объект поля
-     * @throws Exception
-     */
-    public function field($name = null) {
-        $fieldName = is_null($name) ? $this->getPrimaryKeyName() : $name;
-        if (!isset($this->fields[$fieldName])) {
-            throw new Exception("Поле \"{$fieldName}\" не существует в модели \"{$this->tableName}\".");
+        if (!$this->hasField($name)) {
+            throw new InvalidArgumentException("Field with name \"{$name}\" not found in \"{$this->cls()}\" model.");
         }
 
-        return $this->fields[$fieldName];
+        return $this->fields[$name];
     }
 
-    public function isNew() {
-        return !isset($this->fields[$this->getPrimaryKeyName()]) || !$this->fields[$this->getPrimaryKeyName()]->value;
+    /**
+     * Delete this entity
+     *
+     * @return $this
+     * @throws Exception
+     */
+    public function delete()
+    {
+        if (!is_null($this->marksDeletedFieldName)) {
+            if (!$this->hasField($this->marksDeletedFieldName)) {
+                throw new Exception("Field with name \"{$this->marksDeletedFieldName}\" not found.");
+            }
+
+            $this->{$this->marksDeletedFieldName} = true;
+            $this->save();
+        } else {
+            $delete = $this->builder->delete();
+            $query = $delete->tables($this->getTableName())
+                ->where($this->getPKName(), '=', '?')
+                ->build();
+
+            $this->getDriver()->query($query, [$this->getPK()]);
+            foreach ($this->getFieldsNames() as $fieldName) {
+                $this->{$fieldName} = null;
+            }
+        }
+
+        $this->isDeleted = true;
+
+        return $this;
     }
 
-    public function getFields() {
+    /**
+     * Fill entity
+     *
+     * @param <string, mixed>[] $data
+     * @return $this
+     */
+    private function fill(array $data = [])
+    {
+        foreach ($data as $name => $value) {
+            $this->{$name} = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get entity data as assoc array
+     *
+     * @return array
+     */
+    public function getAssocArray()
+    {
         return $this->fields;
     }
 
     /**
-     * Получить список полей модели
+     * Get driver
      *
-     * @return string[] Имена полей модели
+     * @return DriverInterface
      */
-    public function getFieldsNames() {
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * Get fields names list
+     *
+     * @return string[]
+     */
+    public function getFieldsNames()
+    {
         return array_keys($this->fields);
     }
 
-    public function getFieldsDisplayNames() {
+    /**
+     * Get displayed fields names
+     *
+     * @return string[]
+     */
+    public function getFieldsDisplayNames()
+    {
         return $this->fieldsDisplayNames;
     }
 
-    public function builder() {
-        return $this->builder;
+    /**
+     * Get entity data as JSON
+     *
+     * @return string
+     */
+    public function getJSON()
+    {
+        $object = new stdClass();
+        foreach ($this->getFieldsNames() as $name) {
+            $object->{$name} = $this->{$name};
+        }
+
+        return json_encode($object);
     }
 
     /**
-     * @return static[]
+     * Get PK value
+     *
+     * @return int
      */
-    public function findAll() {
-        $query = $this->builder()->build();
-        return $this->resultToEntities($query);
+    public function getPK()
+    {
+        return $this->{$this->pkName};
     }
 
-    public function load($primaryKey) {
-        $driver = $this->driver;
+    /**
+     * Get PK field name
+     *
+     * @return string
+     */
+    public function getPKName()
+    {
+        return $this->pkName;
+    }
 
-        $query = $this->builder()
-            ->where("{$this->primaryKeyName}={$primaryKey}")
+    /**
+     * Get table name
+     *
+     * @return string
+     */
+    public function getTableName()
+    {
+        return $this->tableName;
+    }
+
+    /**
+     * Get query builder
+     *
+     * @return Select
+     */
+    public function getQueryBuilder()
+    {
+        $this->select = $this->builder->select();
+        $this->select->table($this->getTableName());
+
+        return $this->select;
+    }
+
+    /**
+     * Get entity data as XML
+     *
+     * @return string
+     */
+    public function getXML()
+    {
+        $xml = new SimpleXMLElement('<entity/>');
+        foreach ($this->fields as $field => $value) {
+            $xml->addChild($field, $value);
+        }
+
+        return $xml->asXML();
+    }
+
+    /**
+     * Check field exists by name
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasField($name)
+    {
+        if (!is_string($name)) {
+            throw new InvalidArgumentException('Field name must be a string.');
+        }
+
+        return array_key_exists($name, $this->fields);
+    }
+
+    /**
+     * Load entity by PK
+     *
+     * @param int $primaryKey PK
+     */
+    public function load($primaryKey)
+    {
+        if (!is_integer($primaryKey)) {
+            throw new InvalidArgumentException('Primary key value must be a integer.');
+        }
+        $query = $this->getQueryBuilder()
+            ->where($this->getPKName(), '=', '?')
             ->build();
 
-        $driver->query($query);
-
-        $fieldsData = $driver->fetchAssoc();
-        if (!empty($fieldsData)) {
-            foreach ($fieldsData[0] as $field => $value) {
-                $this->{$field} = $this->field($field)->type->toObject($value);
-            }
+        $this->getDriver()->query($query, [$primaryKey]);
+        $row = $this->getDriver()->fetchRowAssoc();
+        if (!empty($row)) {
+            $this->fill($row);
         }
     }
 
     /**
-     * @param string|null $order
-     * @param string $direction
-     * @param int|null $limit
-     * @param int|null $offset
+     * Load all entities satisfying conditions
      *
      * @return static[]
      */
-    public function fetchAll($order = null, $direction = 'asc', $limit = null, $offset = null) {
-        $select = new Select();
+    public function loadAll()
+    {
+        $aEntities = [];
 
-        $query = $select
-            ->order(is_null($order) ? $this->primaryKeyName : $order, $direction)
-            ->limit($limit)
-            ->offset($offset)
-            ->build();
+        $this->getDriver()->query($this->getQueryBuilder()->build());
+        while ($row = $this->getDriver()->fetchRowAssoc()) {
+            $aEntities[] = (new static($this->getDriver()))->fill($row);
+        }
 
-        return $this->resultToEntities($query);
+        return $aEntities;
     }
 
-    public function getPrimaryKey() {
-        return $this->{$this->primaryKeyName};
+    /**
+     * Check entity "new status"
+     *
+     * @return bool
+     */
+    public function isNew()
+    {
+        return is_null($this->getPK());
     }
 
-    public function getPrimaryKeyName() {
-        return $this->primaryKeyName;
-    }
-
-    public function commit() {
+    /**
+     * Save entity data into data source
+     *
+     * @return $this
+     * @throws Exception
+     */
+    public function save() {
         if ($this->isDeleted) {
-            throw new Exception('Данные модели уже удалены.');
+            throw new Exception('Entity deleted.');
         }
 
         $driver = $this->driver;
-        $allowedFields = array_diff($this->getFieldsNames(), [$this->primaryKeyName]);
+        $allowedFields = array_diff(array_values($this->getAssocArray()), [$this->getPKName() => $this->getPK()]);
 
-        if (is_null($this->getPrimaryKey())) {
-            $insert = new Insert();
+        if ($this->isNew()) {
+            $insert = $this->builder->insert();
             $insert->table($this->tableName)->fields($allowedFields);
 
             $values = [];
@@ -188,137 +320,53 @@ abstract class Entity implements InterfaceEntity {
                 ->build();
 
             $driver->query($query);
-            $this->{$this->primaryKeyName} = $driver->lastInsertId();
+            $this->{$this->getPKName()} = $driver->getLastInsertedPK();
         } else {
-            $update = new Update();
+            $update = $this->builder->update();
             $update->table($this->tableName);
 
             foreach ($allowedFields as $field) {
                 $update->set($field, '?');
             }
             $query = $update
-                ->where("{$this->primaryKeyName}=?")
+                ->where($this->getPKName(), '=', '?')
                 ->build();
 
-            $driver->prepare($query);
-
-            $types = '';
-            $parameters = [];
-            foreach ($allowedFields as $field) {
-                $currentField = $this->field($field);
-
-                $types .= $currentField->type->getSQLParamType();
-                $parameters[] = $currentField->asSql();
-            }
-            $primaryKeyField = $this->field();
-            $types .= $primaryKeyField->type->getSQLParamType();
-            $parameters[] = $primaryKeyField->asSql();
-
-            $driver->bindParameter($types, $parameters);
-            $driver->execute();
+            $driver->query($query, $allowedFields);
         }
 
-    }
-
-    public function delete() {
-        $delete = new Delete();
-
-        $query = $delete
-            ->table($this->tableName)
-            ->where("{$this->primaryKeyName}={$this->getPrimaryKey()}")
-            ->build();
-
-        $this->driver->query($query);
-        foreach ($this->getFieldsNames() as $field) {
-            $this->{$field} = null;
-        }
-        $this->isDeleted = true;
-    }
-
-    public function asJSON() {
-        $jsonParts = [];
-        foreach ($this->getFieldsNames() as $field) {
-            if ($this->{$field} instanceof DateTime) {
-                $jsonParts[] = "\"{$field}\": \"{$this->{$field}->format('Y-m-d H:i:s')}\"";
-            } else {
-                $jsonParts[] = "\"{$field}\": \"{$this->{$field}}\"";
-            }
-
-        }
-        $json = '{' . implode(', ', $jsonParts) . '}';
-
-        return $json;
-    }
-
-    public function asXML() {
-        // TODO: Implement asXML() method.
-    }
-
-    final static public function cls() {
-        return get_called_class();
     }
 
     /**
-     * @param $query
+     * Set table name
      *
-     * @return static[]
+     * @param string $tableName
+     * @return $this
      */
-    protected function resultToEntities($query) {
-        $this->driver->query($query);
-        $entities = [];
-        $result = $this->driver->fetchAssoc();
-        foreach ($result as $row) {
-            /** @var InterfaceEntity $entity */
-            $entity = new static($this->driver);
-            foreach ($row as $field => $value) {
-                $entity->{$field} = $entity->field($field)->type->toObject($value);
-            }
-            $entities[] = $entity;
+    public function setTableName($tableName)
+    {
+        if (!is_string($tableName)) {
+            throw new InvalidArgumentException('Table name must be a string.');
         }
 
-        return $entities;
+        $this->tableName = $tableName;
+        return $this;
     }
 
-    protected function loadColumns() {
-        $cachedColumnsInfo = Cache::instance()->get($this->tableName);
-        if (is_null($cachedColumnsInfo)) {
-            $this->driver->query("show columns from {$this->tableName}");
-            $columnsInfo = [];
-            while ($result = $this->driver->fetchRow()) {
-                list($fieldName, $type, $null, $key, $default, $extra) = $result;
-
-                $typeClass = $this->driver->getColumnTypeClass($type);
-                $columnsInfo[$fieldName] = [
-                    'fieldName' => $fieldName,
-                    'type' => new $typeClass(),
-                    'null' => $this->driver->detectFieldNull($null),
-                    'key' => $this->driver->detectFieldKey($key),
-                    'default' => $default,
-                    'extra' => $extra
-                ];
-            }
-
-            Cache::instance()->push($this->tableName, $columnsInfo);
-        } else {
-            $columnsInfo = Cache::instance()->get($this->tableName);
+    /**
+     * Set PK name
+     *
+     * @param string $pkName
+     * @return $this
+     */
+    public function setPKName($pkName)
+    {
+        if (!is_string($pkName)) {
+            throw new InvalidArgumentException('Primary key name must be a string.');
         }
 
-        foreach ($columnsInfo as $columnInfo) {
-            $field = new Field(
-                $this,
-                $columnInfo['fieldName'],
-                $columnInfo['type'],
-                $columnInfo['null'],
-                $columnInfo['key'],
-                $columnInfo['default'],
-                null,
-                $columnInfo['extra']);
-            if ($field->isPrimary()) {
-                $this->primaryKeyName = $field->name;
-            }
-
-            $this->fields[$columnInfo['fieldName']] = $field;
-        }
+        $this->pkName = $pkName;
+        return $this;
     }
 
 }

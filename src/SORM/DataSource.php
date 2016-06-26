@@ -2,71 +2,185 @@
 namespace SORM;
 
 
-use Exception;
-use SORM\Drivers\Mysql;
-use SORM\Interfaces\InterfaceDriver;
-use SORM\Interfaces\InterfaceEntity;
-use SORM\Traits\TraitSetting;
+use InvalidArgumentException;
+
 
 /**
- * Class DataSource
+ * Data source
  *
- * Базовый класс доступа к данным
+ * Class DataSource
+ * @package SORM
  */
-class DataSource {
+class DataSource implements DataSourceInterface
+{
 
-    const DRIVER_MYSQL = 'MySQL';
-    const DRIVER_POSTGRESQL = 'PostgreSQL';
+    /** @var $this|null */
+    static protected $instance = null;
 
-    /** @var InterfaceDriver[] */
-    static protected $drivers = [];
+    protected function __construct() {}
 
-    /** @var string|null */
-    static protected $current = null;
+    /** @var DriverInterface[] */
+    protected $drivers = [];
+    /** @var string */
+    protected $currentDriverUID = null;
 
-    static public function setup($uniqueName, array $settings = []) {
-        switch ($settings['driver']) {
-            case self::DRIVER_MYSQL:
-                self::$drivers[$uniqueName] = new Mysql($settings);
-                break;
-            case self::DRIVER_POSTGRESQL:
-                // TODO: Реализовать драйвер
-                throw new Exception("Драйвер \"{$settings['driver']}\" не найден.");
-                break;
-            default:
-                throw new Exception("Драйвер \"{$settings['driver']}\" не найден.");
-        }
-    }
-
-    static public function setCurrent($uniqueName) {
-        if (!isset(self::$drivers[$uniqueName])) {
-            throw new Exception("Драйвер с именем \"{$uniqueName}\" не установлен.");
+    /**
+     * @return static Get data source object (singleton)
+     */
+    static public function i()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
         }
 
-        self::$current = $uniqueName;
-    }
-
-    static public function getCurrent() {
-        if (is_null(self::$current)) {
-            throw new Exception("Драйвер не выбран.");
-        }
-
-        return self::$drivers[self::$current];
+        return static::$instance;
     }
 
     /**
-     * @param string $className
-     * @param null $primaryKey
-     *
-     * @return InterfaceEntity
-     * @throws Exception
+     * @return DriverInterface Get current driver
      */
-    static public function factory($className, $primaryKey = null) {
-        if (!class_exists($className)) {
-            throw new Exception("Модель \"{$className}\" не существует.");
+    static public function d()
+    {
+        return static::i()->getCurrentDriver();
+    }
+
+    /**
+     * @return static
+     */
+    public function __invoke()
+    {
+        return static::i();
+    }
+
+    /**
+     * Add driver
+     *
+     * @param string $driverUID
+     * @param DriverInterface $driver
+     * @return $this
+     */
+    public function addDriver($driverUID, DriverInterface $driver)
+    {
+        if ($this->hasDriver($driverUID)) {
+            throw new InvalidArgumentException("Driver with UID \"{$driverUID}\" is already exists.");
         }
 
-        return new $className(self::getCurrent(), $primaryKey);
+        $this->drivers[$driverUID] = $driver;
+        if (sizeof($this->drivers) == 1) {
+            $this->setCurrentDriver($driverUID);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get entity
+     *
+     * @param string $className
+     * @param int|null $pk
+     * @return EntityInterface
+     */
+    public function factory($className, $pk = null)
+    {
+        if (!is_string($className)) {
+            throw new InvalidArgumentException('Class name must be a string.');
+        }
+
+        if (!is_integer($pk) && !is_null($pk)) {
+            throw new InvalidArgumentException('Primary key must be a integer or null.');
+        }
+
+        if (!class_exists($className)) {
+            throw new InvalidArgumentException("Class \"{$className}\" not found.");
+        }
+
+        return new $className($this->getCurrentDriver(), $pk);
+    }
+
+    /**
+     * Get current driver
+     *
+     * @return DriverInterface
+     */
+    public function getCurrentDriver()
+    {
+        return is_null($this->getCurrentDriverUID()) ? null : $this->getDriverByUID($this->getCurrentDriverUID());
+    }
+
+    /**
+     * Get current driver unique identifier
+     *
+     * @return string
+     */
+    public function getCurrentDriverUID()
+    {
+        return $this->currentDriverUID;
+    }
+
+    /**
+     * Get driver by unique identifier
+     *
+     * @param string $driverUID
+     * @return DriverInterface
+     */
+    public function getDriverByUID($driverUID)
+    {
+        if (!$this->hasDriver($driverUID)) {
+            throw new InvalidArgumentException("Driver with UID \"{$driverUID}\" not found.");
+        }
+
+        return $this->drivers[$driverUID];
+    }
+
+    /**
+     * Get drivers
+     *
+     * @return DriverInterface[] <string, InterfaceDriver>[]
+     */
+    public function getDrivers()
+    {
+        return $this->drivers;
+    }
+
+    /**
+     * Get drivers unique identifiers
+     *
+     * @return string[]
+     */
+    public function getDriversUIDs()
+    {
+        return array_keys($this->getDrivers());
+    }
+
+    /**
+     * Check driver exists by unique identifier
+     *
+     * @param string $driverUID
+     * @return bool
+     */
+    public function hasDriver($driverUID)
+    {
+        if (!is_string($driverUID)) {
+            throw new InvalidArgumentException('Driver UID must be a string.');
+        }
+
+        return isset($this->drivers[$driverUID]);
+    }
+
+    /**
+     * Set current driver
+     *
+     * @param string $driverUID
+     * @return $this
+     */
+    public function setCurrentDriver($driverUID)
+    {
+        if (!$this->hasDriver($driverUID)) {
+            throw new InvalidArgumentException("Driver with UID \"{$driverUID}\" not found.");
+        }
+
+        $this->currentDriverUID = $driverUID;
+        return $this;
     }
 
 }

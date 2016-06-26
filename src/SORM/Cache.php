@@ -1,8 +1,9 @@
 <?php
-namespace SORM\Entity;
+namespace SORM;
 
 
-class Cache {
+class Cache
+{
 
     static private $instance = null;
 
@@ -10,7 +11,8 @@ class Cache {
 
     private function __construct() {}
 
-    static public function instance() {
+    static public function instance()
+    {
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
@@ -18,15 +20,18 @@ class Cache {
         return self::$instance;
     }
 
-    public function push($tableName, array $columnsInfo) {
+    public function push($tableName, array $columnsInfo)
+    {
         $this->instance()->columnsInfo[$tableName] = $columnsInfo;
     }
 
-    public function get($tableName) {
+    public function get($tableName)
+    {
         return isset($this->columnsInfo[$tableName]) ? $this->columnsInfo[$tableName] : null;
     }
 
-    public function clear() {
+    public function clear()
+    {
         $this->columnsInfo = [];
     }
 

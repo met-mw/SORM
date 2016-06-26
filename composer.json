@@ -2,8 +2,7 @@
     "name": "met_mw/sorm",
     "description": "Simple and lightweight ORM library.",
     "type": "library",
-    "license": "LGPL-3.0",
-    "version": "1.0.0",
+    "license": "MIT",
     "authors": [
         {
             "name": "met-mw",
@@ -11,7 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "met_mw/squerybuilder": "dev-master"
+    },
     "autoload": {
         "psr-4": {
             "SORM\\": "src/SORM"

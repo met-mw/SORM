@@ -3,190 +3,151 @@ namespace SORM\Drivers;
 
 
 use Exception;
-use mysqli;
-use mysqli_result;
-use mysqli_stmt;
-use SORM\Driver;
-use SORM\Entity\Field;
+use PDO;
+use PDOStatement;
+use SORM\DriverAbstract;
 
 /**
  * Class Mysql
  *
- * Драйвер для работы с MySQL и MariaDB
+ * Driver for MySQL and MariaDB
  */
-class Mysql extends Driver {
+class Mysql extends DriverAbstract {
 
-    // Допустимые типы данных
-    const TINYINT = 0;
-    const BIT = 1;
-    const SMALLINT = 2;
-    const MEDIUMINT = 3;
-    const INT = 4;
-    const BIGINT = 5;
-    const FLOAT = 6;
-    const DOUBLE = 7;
-    const DECIMAL = 8;
-    const DATE = 9;
-    const DATETIME = 10;
-    const TIMESTAMP = 11;
-    const TIME = 12;
-    const YEAR = 13;
-    const CHAR = 14;
-    const VARCHAR = 15;
-    const TINYBLOB = 16;
-    const TINYTEXT = 17;
-    const BLOB = 18;
-    const TEXT = 19;
-    const MEDIUMBLOB = 20;
-    const MEDIUMTEXT = 21;
-    const LONGBLOB = 22;
-    const LONGTEXT = 23;
+    /** @var PDO */
+    protected $PDO;
+    /** @var PDOStatement */
+    protected $PDOStatement;
 
-    public $typeTemplates = [
-        self::TINYINT => '/^tinyint(\([0-9]*\))?$/i',
-        self::BIT => '/^bit(\([0-9]*\))?$/i',
-        self::SMALLINT => '/^smallint(\([0-9]*\))?$/i',
-        self::MEDIUMINT => '/^mediumint(\([0-9]*\))?$/i',
-        self::INT => '/^int(\([0-9]*\))?$/i',
-        self::BIGINT => '/^bigint(\([0-9]*\))?$/i',
-        self::FLOAT => '/^float$/i',
-        self::DOUBLE => '/^double$/i',
-        self::DECIMAL => '/^decimal(\([0-9]*,[0-9]*\))?$/i',
-        self::DATE => '/^date$/i',
-        self::DATETIME => '/^datetime$/i',
-        self::TIMESTAMP => '/^timestamp$/i',
-        self::TIME => '/^time$/i',
-        self::YEAR => '/^year(4)(\([0-9]*\))?$/i',
-        self::CHAR => '/^char(\([0-9]*\))?$/i',
-        self::VARCHAR => '/^varchar(\([0-9]*\))?$/i',
-        self::TINYBLOB => '/^tinyblob$/i',
-        self::TINYTEXT => '/^tinytext$/i',
-        self::BLOB => '/^blob$/i',
-        self::TEXT => '/^text$/i',
-        self::MEDIUMBLOB => '/^mediumblob$/i',
-        self::MEDIUMTEXT => '/^mediumtext$/i',
-        self::LONGBLOB => '/^longblob$/i',
-        self::LONGTEXT => '/^longtext$/i'
-    ];
+    /** @var string */
+    protected $host;
+    /** @var string */
+    protected $DBName;
+    /** @var string */
+    protected $charset;
+    /** @var string */
+    protected $user;
+    /** @var string */
+    protected $pass;
+    /** @var array */
+    protected $options;
 
-    protected $typeClasses = [
-        self::TINYINT => 'SORM\Entity\Field\Mysql\Tinyint',
-        self::BIT => 'SORM\Entity\Field\Mysql\Bit',
-        self::SMALLINT => 'SORM\Entity\Field\Mysql\Smallint',
-        self::MEDIUMINT => 'SORM\Entity\Field\Mysql\Mediumint',
-        self::INT => 'SORM\Entity\Field\Mysql\Int',
-        self::BIGINT => 'SORM\Entity\Field\Mysql\Bigint',
-        self::FLOAT => 'SORM\Entity\Field\Mysql\Float',
-        self::DOUBLE => 'SORM\Entity\Field\Mysql\Double',
-        self::DECIMAL => 'SORM\Entity\Field\Mysql\Decimal',
-        self::DATE => 'SORM\Entity\Field\Mysql\Date',
-        self::DATETIME => 'SORM\Entity\Field\Mysql\Datetime',
-        self::TIMESTAMP => 'SORM\Entity\Field\Mysql\Timestamp',
-        self::TIME => 'SORM\Entity\Field\Mysql\Time',
-        self::YEAR => 'SORM\Entity\Field\Mysql\Year',
-        self::CHAR => 'SORM\Entity\Field\Mysql\Char',
-        self::VARCHAR => 'SORM\Entity\Field\Mysql\Varchar',
-        self::TINYBLOB => 'SORM\Entity\Field\Mysql\Tinyblob',
-        self::TINYTEXT => 'SORM\Entity\Field\Mysql\Tinytext',
-        self::BLOB => 'SORM\Entity\Field\Mysql\Blob',
-        self::TEXT => 'SORM\Entity\Field\Mysql\Text',
-        self::MEDIUMBLOB => 'SORM\Entity\Field\Mysql\Mediumblob',
-        self::MEDIUMTEXT => 'SORM\Entity\Field\Mysql\Mediumtext',
-        self::LONGBLOB => 'SORM\Entity\Field\Mysql\Longblob',
-        self::LONGTEXT => 'SORM\Entity\Field\Mysql\Longtext'
-    ];
-
-    /** @var mysqli */
-    private $mysqli = null;
-    /** @var mysqli_result|boolean */
-    private $result = null;
-    /** @var mysqli_stmt */
-    private $stmt = null;
-
-    protected function config() {
-        $host = $this->getSetting('host');
-        $user = $this->getSetting('user');
-        $password = $this->getSetting('password');
-        $db = $this->getSetting('db');
-
-        $this->mysqli = new mysqli($host, $user, $password, $db);
-
-        if ($this->mysqli->connect_errno) {
-            throw new Exception("Не удалось подключиться к MySQL: " . $this->mysqli->connect_error);
-        }
+    /**
+     * Mysql constructor.
+     * @param string $host Host
+     * @param string $DBName Data base name
+     * @param string $charset Charset
+     * @param string $user User name
+     * @param string $pass Password
+     * @param array $options
+     */
+    public function __construct($host, $DBName, $charset, $user, $pass, array $options = [])
+    {
+        $this->host = $host;
+        $this->DBName = $DBName;
+        $this->charset = $charset;
+        $this->user = $user;
+        $this->pass = $pass;
+        $this->options = $options;
     }
 
-    public function query($query) {
-        $this->result = $this->mysqli->query($query);
-        if ($this->mysqli->errno) {
-            throw new Exception("При выполнении запроса произошла ошибка: \"{$this->mysqli->error}\"");
-        }
+    /**
+     * Connecting
+     *
+     * @param bool $isPersistent
+     * @return $this
+     */
+    public function connect($isPersistent = false)
+    {
+        $dsn = "mysql:host={$this->host};dbname={$this->DBName};charset={$this->charset}";
+        $this->PDO = new PDO($dsn, $this->user, $this->pass, $this->options);
+
+        return $this;
     }
 
-    public function fetchAssoc() {
-        $assoc = [];
-        while ($row = $this->result->fetch_assoc()) {
-            $assoc[] = $row;
+    /**
+     * Fetch row
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function fetchRow()
+    {
+        if (is_null($this->PDOStatement)) {
+            throw new Exception('No query results.');
         }
 
-        return $assoc;
+        return $this->PDOStatement->fetch();
     }
 
-    public function fetchRow() {
-        return $this->result->fetch_row();
-    }
-
-    public function fetchFields() {
-        return $this->result->fetch_fields();
-    }
-
-    public function fetchAll() {
-        return $this->result->fetch_all();
-    }
-
-    public function lastInsertId() {
-        return $this->mysqli->insert_id;
-    }
-
-    public function prepare($query) {
-        $this->stmt = $this->mysqli->prepare($query);
-    }
-
-    public function bindParameter($types, array $parameters) {
-        $preparedAttributes = [];
-        $counter = 0;
-        foreach ($parameters as $parameter) {
-            $parameterName = "bindParam{$counter}";
-            $$parameterName = $parameter;
-            $preparedAttributes[] = &$$parameterName;
-            $counter++;
-        }
-        array_unshift($preparedAttributes, $types);
-        call_user_func_array([$this->stmt, 'bind_param'], $preparedAttributes);
-    }
-
-    public function execute() {
-        $this->stmt->execute();
-    }
-
-    public function getResult() {
-        $this->result;
-    }
-
-    public function detectFieldKey($key) {
-        switch (mb_strtolower($key)) {
-            case 'pri':
-                $result = Field::KEY_PRIMARY;
-                break;
-            default:
-                $result = Field::KEY_EMPTY;
+    /**
+     * Fetch row as assoc array
+     *
+     * @return array <string, mixed>
+     * @throws Exception
+     */
+    public function fetchRowAssoc()
+    {
+        if (is_null($this->PDOStatement)) {
+            throw new Exception('No query results.');
         }
 
-        return $result;
+        return $this->PDOStatement->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function detectFieldNull($null) {
-        return mb_strtolower($null) == 'yes';
+    /**
+     * Fetch all rows
+     * @return array[]
+     *
+     * @throws Exception
+     */
+    public function fetchAll()
+    {
+        if (is_null($this->PDOStatement)) {
+            throw new Exception('No query results.');
+        }
+
+        return $this->PDOStatement->fetchAll();
+    }
+
+    /**
+     * Fetch all rows as assoc array
+     *
+     * @return array <string, mixed>[]
+     * @throws Exception
+     */
+    public function fetchAllAssoc()
+    {
+        if (is_null($this->PDOStatement)) {
+            throw new Exception('No query results.');
+        }
+
+        return $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get last inserted PK
+     *
+     * @return int
+     */
+    public function getLastInsertedPK()
+    {
+        return $this->PDO->lastInsertId();
+    }
+
+    /**
+     * Execute query
+     *
+     * @param string $query Query string
+     * @param array $parameters Parameters
+     * @return $this
+     */
+    public function query($query, $parameters = [])
+    {
+        $this->PDOStatement = $this->PDO->prepare($query);
+        $this->PDOStatement->execute($parameters);
+
+        return $this;
     }
 
 }
