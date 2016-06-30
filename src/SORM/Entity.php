@@ -305,7 +305,7 @@ abstract class Entity implements EntityInterface {
         }
 
         $driver = $this->driver;
-        $allowedFields = array_diff(array_values($this->getAssocArray()), [$this->getPKName() => $this->getPK()]);
+        $allowedFields = array_diff(array_keys($this->getAssocArray()), [$this->getPKName()]);
 
         if ($this->isNew()) {
             $insert = $this->builder->insert();
