@@ -209,8 +209,10 @@ abstract class Entity implements EntityInterface {
      */
     public function getQueryBuilder()
     {
-        $this->select = $this->builder->select();
-        $this->select->table($this->getTableName());
+        if (is_null($this->select)) {
+            $this->select = $this->builder->select();
+            $this->select->table($this->getTableName());
+        }
 
         return $this->select;
     }
