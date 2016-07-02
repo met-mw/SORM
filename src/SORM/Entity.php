@@ -309,14 +309,15 @@ abstract class Entity implements EntityInterface {
         $driver = $this->driver;
         $allowedFields = array_diff(array_keys($this->getAssocArray()), [$this->getPKName()]);
 
+        $values = [];
+        foreach ($allowedFields as $field) {
+            $values[] = $this->{$field};
+        }
+
         if ($this->isNew()) {
             $insert = $this->builder->insert();
             $insert->table($this->tableName)->fields($allowedFields);
 
-            $values = [];
-            foreach ($allowedFields as $field) {
-                $values[] = $this->{$field};
-            }
             $query = $insert
                 ->values($values)
                 ->build();
@@ -334,7 +335,7 @@ abstract class Entity implements EntityInterface {
                 ->where($this->getPKName(), '=', '?')
                 ->build();
 
-            $driver->query($query, $allowedFields);
+            $driver->query($query, $values);
         }
 
     }
