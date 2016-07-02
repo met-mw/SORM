@@ -17,7 +17,7 @@ abstract class DriverAbstract implements DriverInterface {
     {
         $cachedColumnsInfo = Cache::instance()->get($oEntity->getTableName());
         if (is_null($cachedColumnsInfo)) {
-            $this->query("show columns from {$oEntity->getTableName()}");
+            $this->query("show columns from `{$oEntity->getTableName()}`");
             $fields = [];
             while ($result = $this->fetchRow()) {
                 $fields[$result[0]] = null;
