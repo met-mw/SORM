@@ -327,6 +327,7 @@ abstract class Entity implements EntityInterface {
         } else {
             $update = $this->builder->update();
             $update->table($this->tableName);
+            $values[] = $this->getPK();
 
             foreach ($allowedFields as $field) {
                 $update->set($field, '?');
