@@ -115,9 +115,10 @@ interface EntityInterface
     /**
      * Load all entities satisfying conditions
      *
+     * @param array $parameters
      * @return static[]
      */
-    public function loadAll();
+    public function loadAll(array $parameters = []);
 
     /**
      * Save entity data into data source

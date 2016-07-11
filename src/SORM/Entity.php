@@ -271,13 +271,13 @@ abstract class Entity implements EntityInterface {
     /**
      * Load all entities satisfying conditions
      *
+     * @param array $parameters
      * @return static[]
      */
-    public function loadAll()
+    public function loadAll(array $parameters = [])
     {
         $aEntities = [];
-
-        $this->getDriver()->query($this->getQueryBuilder()->build());
+        $this->getDriver()->query($this->getQueryBuilder()->build(), $parameters);
         while ($row = $this->getDriver()->fetchRowAssoc()) {
             $aEntities[] = (new static($this->getDriver()))->fill($row);
         }
