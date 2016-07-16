@@ -87,7 +87,7 @@ abstract class Entity implements EntityInterface {
             $this->save();
         } else {
             $delete = $this->builder->delete();
-            $query = $delete->tables($this->getTableName())
+            $query = $delete->table($this->getTableName())
                 ->where($this->getPKName(), '=', '?')
                 ->build();
 
