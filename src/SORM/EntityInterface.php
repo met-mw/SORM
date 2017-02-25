@@ -148,6 +148,6 @@ interface EntityInterface
      *
      * @return int
      */
-    public function getCount();
+    public function getFullCount();
 
 } 
