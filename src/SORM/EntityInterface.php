@@ -143,4 +143,11 @@ interface EntityInterface
      */
     public function setPKName($pkName);
 
+    /**
+     * Get count of entities
+     *
+     * @return int
+     */
+    public function getCount();
+
 } 

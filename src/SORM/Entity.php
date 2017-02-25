@@ -373,4 +373,9 @@ abstract class Entity implements EntityInterface {
         return $this;
     }
 
+    public function getCount()
+    {
+        return (int)$this->driver->query("select count(*) from `{$this->getTableName()}`")->fetchRow()[0];
+    }
+
 }
